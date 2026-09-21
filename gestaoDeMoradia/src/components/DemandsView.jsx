@@ -51,7 +51,7 @@ export default function DemandsView({
       case 'Em Atendimento':
         return 'bg-purple-100 text-purple-900 border-purple-300';
       case 'Resolvido':
-        return 'bg-emerald-100 text-emerald-900 border-emerald-300';
+        return 'bg-ufersa-green-100 text-ufersa-green-900 border-ufersa-green-300';
       default:
         return 'bg-slate-100 text-slate-700';
     }
@@ -78,7 +78,7 @@ export default function DemandsView({
 
         <button
           onClick={onOpenNewDemand}
-          className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+          className="px-4 py-2.5 bg-ufersa-green-700 hover:bg-ufersa-green-800 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
           {currentRole === 'morador' ? 'Nova Solicitação de Atendimento' : 'Registrar Demanda In Loco'}
@@ -117,16 +117,16 @@ export default function DemandsView({
                   onClick={() => setSelectedDemandId(demand.id)}
                   className={`p-3.5 rounded-2xl border cursor-pointer transition text-xs flex flex-col gap-1.5 ${
                     isSelected
-                      ? 'bg-emerald-50/70 border-emerald-600 shadow-xs ring-1 ring-emerald-600'
+                      ? 'bg-ufersa-green-50/70 border-ufersa-green-600 shadow-xs ring-1 ring-ufersa-green-600'
                       : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] font-bold text-slate-500">
+                    <span className="font-mono text-xs font-bold text-slate-500">
                       {demand.id}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusBadge(
+                      className={`text-xs font-bold px-2 py-0.5 rounded-full border ${getStatusBadge(
                         demand.status
                       )}`}
                     >
@@ -138,12 +138,12 @@ export default function DemandsView({
                     {demand.titulo}
                   </h3>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                  <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
                     <span className="truncate max-w-[170px]">{demand.moradorNome}</span>
                     <span className="shrink-0">{demand.quarto}</span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                  <div className="flex items-center justify-between text-xs text-slate-400">
                     <span>Prioridade: <strong className="text-slate-700">{demand.prioridade}</strong></span>
                     <span>{demand.dataAbertura}</span>
                   </div>
@@ -165,7 +165,7 @@ export default function DemandsView({
                 <div className="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      <span className="font-mono text-xs font-bold text-ufersa-green-800 bg-ufersa-green-50 px-2 py-0.5 rounded border border-ufersa-green-200">
                         {selectedDemand.id}
                       </span>
                       <span
@@ -184,14 +184,14 @@ export default function DemandsView({
                   {/* Alteração rápida de status pelo Gestor */}
                   {currentRole !== 'morador' && (
                     <div className="flex items-center gap-1 shrink-0 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-                      <span className="text-[10px] font-bold text-slate-500 px-1">Mudar Status:</span>
+                      <span className="text-xs font-bold text-slate-500 px-1">Mudar Status:</span>
                       {['Pendente', 'Em Análise', 'Em Atendimento', 'Resolvido'].map((st) => (
                         <button
                           key={st}
                           onClick={() => onUpdateDemandStatus(selectedDemand.id, st)}
-                          className={`px-2 py-1 rounded text-[10px] font-bold transition ${
+                          className={`px-2 py-1 rounded text-xs font-bold transition ${
                             selectedDemand.status === st
-                              ? 'bg-emerald-800 text-white shadow-2xs'
+                              ? 'bg-ufersa-green-800 text-white shadow-2xs'
                               : 'text-slate-600 hover:bg-slate-200'
                           }`}
                         >
@@ -205,27 +205,27 @@ export default function DemandsView({
                 {/* Metadados */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Solicitante:</span>
+                    <span className="text-slate-500 block text-xs">Solicitante:</span>
                     <strong className="text-slate-900">{selectedDemand.moradorNome}</strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Localização:</span>
+                    <span className="text-slate-500 block text-xs">Localização:</span>
                     <strong className="text-slate-900">{selectedDemand.quarto}</strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Categoria:</span>
-                    <span className="text-emerald-900 font-semibold">{selectedDemand.tipo}</span>
+                    <span className="text-slate-500 block text-xs">Categoria:</span>
+                    <span className="text-ufersa-green-900 font-semibold">{selectedDemand.tipo}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Origem:</span>
+                    <span className="text-slate-500 block text-xs">Origem:</span>
                     <span className="text-slate-700">{selectedDemand.origem}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Data de Abertura:</span>
+                    <span className="text-slate-500 block text-xs">Data de Abertura:</span>
                     <span className="text-slate-700">{selectedDemand.dataAbertura}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[11px]">Prioridade:</span>
+                    <span className="text-slate-500 block text-xs">Prioridade:</span>
                     <span className="font-bold text-amber-700">{selectedDemand.prioridade}</span>
                   </div>
                 </div>
@@ -241,7 +241,7 @@ export default function DemandsView({
                 {/* Timeline de Respostas e Despachos */}
                 <div>
                   <h3 className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5 text-emerald-700" />
+                    <MessageSquare className="w-3.5 h-3.5 text-ufersa-green-700" />
                     Histórico de Acompanhamento e Despachos ({selectedDemand.respostas?.length || 0})
                   </h3>
 
@@ -252,8 +252,8 @@ export default function DemandsView({
                           key={idx}
                           className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1"
                         >
-                          <div className="flex items-center justify-between text-[11px]">
-                            <strong className="text-emerald-900">{resp.autor}</strong>
+                          <div className="flex items-center justify-between text-xs">
+                            <strong className="text-ufersa-green-900">{resp.autor}</strong>
                             <span className="text-slate-400">{resp.data}</span>
                           </div>
                           <p className="text-slate-700 leading-relaxed">{resp.mensagem}</p>
@@ -280,11 +280,11 @@ export default function DemandsView({
                       ? 'Escreva um esclarecimento ou comentário sobre a solicitação...'
                       : 'Registrar despacho oficial da COAE / PROAE...'
                   }
-                  className="flex-1 px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="flex-1 px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-ufersa-green-500 focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                  className="px-4 py-2 bg-ufersa-green-800 hover:bg-ufersa-green-900 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
                 >
                   <Send className="w-3.5 h-3.5" />
                   Enviar Despacho

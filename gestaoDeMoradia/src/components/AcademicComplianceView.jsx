@@ -79,30 +79,30 @@ export default function AcademicComplianceView({
 
       {/* Cards de Critérios Normativos */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-        <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5">
-          <span className="font-bold text-emerald-950 block mb-1">Matrícula Mínima Obrigatória</span>
-          <p className="text-[11px] text-emerald-800 leading-tight">
+        <div className="bg-ufersa-green-50/70 border border-ufersa-green-200 rounded-xl p-3.5">
+          <span className="font-bold text-ufersa-green-950 block mb-1">Matrícula Mínima Obrigatória</span>
+          <p className="text-xs text-ufersa-green-800 leading-tight">
             Exigência de manter matrícula ativa em pelo menos <strong>4 componentes curriculares</strong> regulares no semestre.
           </p>
         </div>
 
         <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-3.5">
           <span className="font-bold text-rose-950 block mb-1">Rendimento & Frequência</span>
-          <p className="text-[11px] text-rose-800 leading-tight">
+          <p className="text-xs text-rose-800 leading-tight">
             Sinalização para desligamento caso haja <strong>reprovação por falta</strong> ou mais de 2 reprovações por média.
           </p>
         </div>
 
         <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5">
           <span className="font-bold text-amber-950 block mb-1">Proibição de Trancamento</span>
-          <p className="text-[11px] text-amber-800 leading-tight">
+          <p className="text-xs text-amber-800 leading-tight">
             É <strong>terminantemente proibido</strong> o trancamento total da matrícula no semestre em que residir na moradia.
           </p>
         </div>
 
         <div className="bg-sky-50/70 border border-sky-200 rounded-xl p-3.5">
           <span className="font-bold text-sky-950 block mb-1">Incompatibilidade de Auxílio</span>
-          <p className="text-[11px] text-sky-800 leading-tight">
+          <p className="text-xs text-sky-800 leading-tight">
             É vedado acumular moradia estudantil com o benefício de <strong>Auxílio Transporte</strong> (registro manual pelo gestor).
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function AcademicComplianceView({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nome, matrícula ou curso..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-ufersa-green-500 focus:outline-none"
             />
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function AcademicComplianceView({
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase text-[10px] tracking-wider">
+            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase text-xs tracking-wider">
               <tr>
                 <th className="px-4 py-3.5">Discente / Matrícula</th>
                 <th className="px-3 py-3.5">Vaga / Campus</th>
@@ -182,7 +182,7 @@ export default function AcademicComplianceView({
                     <td className="px-4 py-3">
                       <div>
                         <strong className="text-slate-900 font-bold block">{resident.nome}</strong>
-                        <span className="text-[11px] text-slate-500 font-mono">
+                        <span className="text-xs text-slate-500 font-mono">
                           {resident.matricula} • {resident.curso}
                         </span>
                       </div>
@@ -193,7 +193,7 @@ export default function AcademicComplianceView({
                       <span className="font-semibold text-slate-800 block">
                         {resident.quarto} • {resident.camaId}
                       </span>
-                      <span className="text-[11px] text-slate-500">{resident.campusNome}</span>
+                      <span className="text-xs text-slate-500">{resident.campusNome}</span>
                     </td>
 
                     {/* Componentes Matriculados (mínimo 4) */}
@@ -202,14 +202,14 @@ export default function AcademicComplianceView({
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-bold ${
                           hasMatriculaInsuficiente
                             ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                            : 'bg-emerald-100 text-emerald-800'
+                            : 'bg-ufersa-green-100 text-ufersa-green-800'
                         }`}
                         title={hasMatriculaInsuficiente ? 'Menos de 4 disciplinas matriculadas (Inconforme)' : 'Atende ao mínimo regulamentar'}
                       >
                         {hasMatriculaInsuficiente ? (
                           <XCircle className="w-3 h-3 text-rose-600" />
                         ) : (
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <CheckCircle2 className="w-3 h-3 text-ufersa-green-600" />
                         )}
                         {resident.componentesMatriculados} disc.
                       </span>
@@ -219,15 +219,15 @@ export default function AcademicComplianceView({
                     <td className="px-3 py-3 text-center">
                       <div className="flex flex-col items-center gap-0.5">
                         {hasReprovacaoFalta ? (
-                          <span className="px-2 py-0.5 bg-rose-600 text-white rounded text-[10px] font-bold">
+                          <span className="px-2 py-0.5 bg-rose-600 text-white rounded text-xs font-bold">
                             Reprov. Falta
                           </span>
                         ) : resident.reprovacaoMediaQtd > 0 ? (
-                          <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[10px] font-semibold">
+                          <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-xs font-semibold">
                             {resident.reprovacaoMediaQtd} por média
                           </span>
                         ) : (
-                          <span className="text-emerald-700 font-semibold text-[11px]">Nenhuma</span>
+                          <span className="text-ufersa-green-700 font-semibold text-xs">Nenhuma</span>
                         )}
                       </div>
                     </td>
@@ -239,7 +239,7 @@ export default function AcademicComplianceView({
                           Trancado
                         </span>
                       ) : (
-                        <span className="text-emerald-700 font-semibold">Regular</span>
+                        <span className="text-ufersa-green-700 font-semibold">Regular</span>
                       )}
                     </td>
 
@@ -247,7 +247,7 @@ export default function AcademicComplianceView({
                     <td className="px-3 py-3 text-center">
                       <button
                         onClick={() => onToggleAuxilioTransporte && onToggleAuxilioTransporte(resident.id)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold transition cursor-pointer ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold transition cursor-pointer ${
                           hasConflitoTransporte
                             ? 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200'
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
@@ -284,7 +284,7 @@ export default function AcademicComplianceView({
                           Prazo Limite Atingido
                         </span>
                       ) : (
-                        <span className="inline-block px-2.5 py-1 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        <span className="inline-block px-2.5 py-1 rounded-full font-bold bg-ufersa-green-100 text-ufersa-green-800 border border-ufersa-green-200">
                           Regular (Conforme)
                         </span>
                       )}
@@ -304,7 +304,7 @@ export default function AcademicComplianceView({
                         {hasAnyAlert && (
                           <button
                             onClick={() => onOpenDesligamento(resident)}
-                            className="px-2.5 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-2xs"
+                            className="px-2.5 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-bold text-xs flex items-center gap-1 shadow-2xs"
                             title="Instaurar processo de desligamento"
                           >
                             <UserX className="w-3 h-3" />

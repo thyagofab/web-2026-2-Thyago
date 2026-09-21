@@ -70,7 +70,7 @@ export default function DashboardView({
             <h1 className="text-xl font-black text-slate-900 tracking-tight">
               Painel Geral de Ocupação e Permanência
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-ufersa-green-100 text-ufersa-green-800 border border-ufersa-green-200">
               PROAE / COAE
             </span>
           </div>
@@ -82,7 +82,7 @@ export default function DashboardView({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onNavigate('infrastructure')}
-            className="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-ufersa-green-800 hover:bg-ufersa-green-900 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5"
           >
             <Bed className="w-4 h-4" />
             Mapa de Vagas
@@ -91,7 +91,7 @@ export default function DashboardView({
             onClick={() => onNavigate('academic')}
             className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition flex items-center gap-1.5"
           >
-            <TrendingUp className="w-4 h-4 text-emerald-700" />
+            <TrendingUp className="w-4 h-4 text-ufersa-green-700" />
             Auditoria Acadêmica
           </button>
         </div>
@@ -110,7 +110,7 @@ export default function DashboardView({
                   <h3 className="text-sm font-bold text-amber-950">
                     Aviso de Prazo Máximo Regulamentar ({imminentVacancies.length} discentes em período final)
                   </h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">
                     Duração Regular + 2 Semestres
                   </span>
                 </div>
@@ -126,8 +126,8 @@ export default function DashboardView({
                       className="bg-white/90 border border-amber-300/80 px-2.5 py-1 rounded-lg text-xs flex items-center gap-2 shadow-2xs"
                     >
                       <span className="font-semibold text-slate-900">{m.nome}</span>
-                      <span className="text-[11px] text-amber-800 font-mono">({m.camaId})</span>
-                      <span className="text-[10px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-medium">
+                      <span className="text-xs text-amber-800 font-mono">({m.camaId})</span>
+                      <span className="text-xs bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-medium">
                         Semestre {m.semestreAtual} de {m.duracaoRegularSemestres + 2} máx.
                       </span>
                     </div>
@@ -156,7 +156,7 @@ export default function DashboardView({
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Taxa Geral de Ocupação
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-ufersa-green-100 text-ufersa-green-800 flex items-center justify-center">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
@@ -169,13 +169,13 @@ export default function DashboardView({
           {/* Progress bar */}
           <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
             <div
-              className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
+              className="bg-ufersa-green-600 h-2 rounded-full transition-all duration-500"
               style={{ width: `${occupancyRate}%` }}
             />
           </div>
-          <p className="text-[11px] text-slate-500 mt-2 flex items-center justify-between">
+          <p className="text-xs text-slate-500 mt-2 flex items-center justify-between">
             <span>{occupiedBeds} leitos ocupados</span>
-            <span className="text-emerald-700 font-semibold">{freeBeds} leitos livres</span>
+            <span className="text-ufersa-green-700 font-semibold">{freeBeds} leitos livres</span>
           </p>
         </div>
 
@@ -193,7 +193,7 @@ export default function DashboardView({
             <span className="text-3xl font-black text-sky-950">{freeBeds}</span>
             <span className="text-xs text-slate-500 font-medium">prontas para alocação</span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-3">
+          <p className="text-xs text-slate-500 mt-3">
             {maintenanceBeds > 0 ? `${maintenanceBeds} leito em manutenção física.` : 'Nenhum leito interditado.'}
           </p>
           <button
@@ -219,10 +219,10 @@ export default function DashboardView({
             <span className="text-3xl font-black text-slate-900">{avgSemestres}</span>
             <span className="text-xs text-slate-500 font-medium">semestres letivos</span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-3">
+          <p className="text-xs text-slate-500 mt-3">
             Média histórica dos {filteredResidents.length} residentes ativos.
           </p>
-          <span className="inline-block mt-2 text-[10px] font-semibold text-purple-800 bg-purple-50 px-2 py-0.5 rounded">
+          <span className="inline-block mt-2 text-xs font-semibold text-purple-800 bg-purple-50 px-2 py-0.5 rounded">
             Limite: Duração Regular + 2 Semestres
           </span>
         </div>
@@ -241,7 +241,7 @@ export default function DashboardView({
             <span className="text-3xl font-black text-amber-950">{pendingDemands.length}</span>
             <span className="text-xs text-slate-500 font-medium">aguardando atendimento</span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-3">
+          <p className="text-xs text-slate-500 mt-3">
             Atendimento contínuo para suporte e infraestrutura.
           </p>
           <button
@@ -269,7 +269,7 @@ export default function DashboardView({
                 Capacidade instalada e ocupação atual por campus universitário
               </p>
             </div>
-            <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+            <span className="text-xs text-ufersa-green-800 font-bold bg-ufersa-green-50 px-2.5 py-1 rounded-lg border border-ufersa-green-200">
               Dados atualizados hoje
             </span>
           </div>
@@ -289,7 +289,7 @@ export default function DashboardView({
                       {campus.ocupadas}/{campus.total} leitos ({campus.pct}%)
                     </span>
                     {campus.livres > 0 && (
-                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">
+                      <span className="text-xs font-semibold text-ufersa-green-700 bg-ufersa-green-100/70 px-2 py-0.5 rounded">
                         {campus.livres} vaga livre
                       </span>
                     )}
@@ -301,7 +301,7 @@ export default function DashboardView({
                       campus.pct >= 90
                         ? 'bg-rose-500'
                         : campus.pct >= 70
-                        ? 'bg-emerald-600'
+                        ? 'bg-ufersa-green-600'
                         : 'bg-sky-500'
                     }`}
                     style={{ width: `${campus.pct}%` }}
@@ -315,15 +315,15 @@ export default function DashboardView({
           <div className="mt-5 pt-4 border-t border-slate-200/80">
             <div className="flex items-center justify-between text-xs mb-2">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-emerald-700" />
+                <Calendar className="w-4 h-4 text-ufersa-green-700" />
                 <span className="font-bold text-slate-900">Campanha Ativa: Recadastramento Semestral 2026.1</span>
               </div>
-              <span className="text-emerald-700 font-bold">9 de 12 submetidos (75%)</span>
+              <span className="text-ufersa-green-700 font-bold">9 de 12 submetidos (75%)</span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-              <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '75%' }} />
+              <div className="bg-ufersa-green-600 h-2 rounded-full" style={{ width: '75%' }} />
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2">
+            <div className="flex items-center justify-between text-xs text-slate-500 mt-2">
               <span>Prazo regulamentar até 30/09/2026</span>
               <span className="text-rose-600 font-semibold">3 moradores em risco de perda da vaga por falta de envio</span>
             </div>
@@ -338,7 +338,7 @@ export default function DashboardView({
                 <ShieldAlert className="w-4 h-4 text-rose-600" />
                 Inconformidades Identificadas
               </h2>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">
                 {academicAlerts.length} casos
               </span>
             </div>
@@ -354,11 +354,11 @@ export default function DashboardView({
                 >
                   <div className="flex items-center justify-between">
                     <strong className="text-slate-900">{aluno.nome}</strong>
-                    <span className="text-[10px] font-bold text-rose-700 font-mono">
+                    <span className="text-xs font-bold text-rose-700 font-mono">
                       {aluno.camaId}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-xs text-slate-600">
                     {aluno.reprovacaoFalta && '• Reprovação por falta registrada.'}
                     {aluno.componentesMatriculados < 4 && '• Menos de 4 disciplinas matriculadas.'}
                     {aluno.acumulaAuxilioTransporte && '• Acúmulo indevido com Auxílio Transporte.'}

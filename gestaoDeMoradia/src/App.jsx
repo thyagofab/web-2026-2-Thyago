@@ -14,6 +14,7 @@ import TermoCompromissoModal from './components/TermoCompromissoModal';
 import AllocateBedModal from './components/AllocateBedModal';
 import DesligamentoModal from './components/DesligamentoModal';
 import NewDemandModal from './components/NewDemandModal';
+import NewRoomModal from './components/NewRoomModal';
 
 import {
   CAMPI,
@@ -52,6 +53,7 @@ export default function App() {
   const [selectedResidentForDesligamento, setSelectedResidentForDesligamento] = useState(null);
 
   const [newDemandModalOpen, setNewDemandModalOpen] = useState(false);
+  const [newRoomModalOpen, setNewRoomModalOpen] = useState(false);
 
   // Usuário padrão logado quando em visão do Morador
   const currentStudentUser = residents.find((r) => r.id === 'morador-1') || residents[0];
@@ -178,6 +180,22 @@ export default function App() {
       tipoAcao: 'Desligamento de Morador',
       detalhes: `Morador ${targetMorador.nome} desligado. Motivo: ${motivo}. Parecer: ${justificativa || 'Nenhum'}. Vaga ${targetMorador.camaId} liberada para suplentes: ${notificarSuplente ? 'Sim' : 'Não'}.`,
       campus: targetMorador.campusNome,
+    };
+    setLogs((prev) => [newLog, ...prev]);
+  };
+
+  // Handler: Cadastrar Novo Quarto (RF01 - Gestão de Infraestrutura)
+  const handleConfirmCreateRoom = (novoQuarto) => {
+    setRooms((prev) => [...prev, novoQuarto]);
+
+    const campusNome = CAMPI.find((c) => c.id === novoQuarto.campusId)?.nome || novoQuarto.campusId;
+    const newLog = {
+      id: `LOG-${Date.now().toString().slice(-4)}`,
+      timestamp: new Date().toLocaleString('pt-BR'),
+      usuario: 'gestor.proae (Infraestrutura)',
+      tipoAcao: 'Cadastro de Novo Quarto',
+      detalhes: `Quarto ${novoQuarto.numero} (${novoQuarto.ala}, ${novoQuarto.bloco}) cadastrado com ${novoQuarto.capacidade} leitos.`,
+      campus: campusNome,
     };
     setLogs((prev) => [newLog, ...prev]);
   };
@@ -352,6 +370,7 @@ export default function App() {
               onOpenAllocate={handleOpenAllocate}
               onOpenTermo={handleOpenTermo}
               onOpenDesligamento={handleOpenDesligamento}
+              onOpenNewRoom={() => setNewRoomModalOpen(true)}
             />
           )}
 
@@ -429,6 +448,7 @@ export default function App() {
         targetBed={targetBedForAllocate}
         targetRoom={targetRoomForAllocate}
         suplentes={suplentes}
+        residents={residents}
         onConfirmAllocate={handleConfirmAllocate}
       />
 
@@ -445,6 +465,13 @@ export default function App() {
         currentUser={currentStudentUser}
         currentRole={currentRole}
         onSaveDemand={handleSaveDemand}
+      />
+
+      <NewRoomModal
+        isOpen={newRoomModalOpen}
+        onClose={() => setNewRoomModalOpen(false)}
+        campi={CAMPI}
+        onConfirmCreateRoom={handleConfirmCreateRoom}
       />
 
     </div>

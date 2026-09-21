@@ -32,7 +32,7 @@ export default function RecadastramentoView({
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Aprovado':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        return 'bg-ufersa-green-100 text-ufersa-green-800 border-ufersa-green-300';
       case 'Em Análise':
         return 'bg-sky-100 text-sky-800 border-sky-300';
       case 'Pendente':
@@ -86,24 +86,24 @@ export default function RecadastramentoView({
       )}
 
       {/* Card da Campanha Vigente */}
-      <div className="bg-gradient-to-br from-emerald-900 to-emerald-950 text-white rounded-2xl p-6 shadow-md border border-emerald-800">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-800/80 pb-5">
+      <div className="bg-gradient-to-br from-ufersa-blue-900 to-ufersa-blue-950 text-white rounded-2xl p-6 shadow-md border border-ufersa-blue-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-ufersa-blue-800/80 pb-5">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-ufersa-green-400">
               Edital Unificado de Renovação
             </span>
             <h2 className="text-lg font-black tracking-tight mt-1">{activeCampaign.titulo}</h2>
-            <p className="text-xs text-emerald-200 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-ufersa-blue-200 mt-1 max-w-2xl leading-relaxed">
               {activeCampaign.descricao}
             </p>
           </div>
 
           <div className="flex flex-col items-end shrink-0 text-xs">
-            <span className="text-emerald-300">Prazo de Submissão:</span>
+            <span className="text-ufersa-blue-300">Prazo de Submissão:</span>
             <strong className="text-white font-mono text-sm">
               {activeCampaign.dataInicio} até {activeCampaign.dataFim}
             </strong>
-            <span className="mt-1 px-2.5 py-0.5 rounded-full bg-emerald-700/70 border border-emerald-500/50 text-[11px] font-bold text-emerald-100">
+            <span className="mt-1 px-2.5 py-0.5 rounded-full bg-ufersa-green-600/70 border border-ufersa-green-400/50 text-xs font-bold text-ufersa-green-100">
               Status: {activeCampaign.status}
             </span>
           </div>
@@ -112,19 +112,19 @@ export default function RecadastramentoView({
         {/* Estatísticas de Envio */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
           <div className="bg-white/10 rounded-xl p-3.5 border border-white/10">
-            <span className="text-xs text-emerald-300">Total de Residentes Alvo:</span>
+            <span className="text-xs text-ufersa-blue-300">Total de Residentes Alvo:</span>
             <p className="text-2xl font-black mt-1">{residents.length}</p>
           </div>
 
           <div className="bg-white/10 rounded-xl p-3.5 border border-white/10">
-            <span className="text-xs text-emerald-300">Formulários Submetidos:</span>
-            <p className="text-2xl font-black text-amber-300 mt-1">
+            <span className="text-xs text-ufersa-blue-300">Formulários Submetidos:</span>
+            <p className="text-2xl font-black text-ufersa-green-300 mt-1">
               {residents.filter((r) => r.recadastramentoStatus !== 'Pendente').length}
             </p>
           </div>
 
           <div className="bg-white/10 rounded-xl p-3.5 border border-white/10">
-            <span className="text-xs text-emerald-300">Inadimplentes (Prazo Expirado):</span>
+            <span className="text-xs text-ufersa-blue-300">Inadimplentes (Prazo Expirado):</span>
             <p className="text-2xl font-black text-rose-300 mt-1">
               {residents.filter((r) => r.recadastramentoStatus === 'Pendente' || r.recadastramentoStatus === 'Desligamento Pendente').length}
             </p>
@@ -170,7 +170,7 @@ export default function RecadastramentoView({
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase text-[10px] tracking-wider">
+            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase text-xs tracking-wider">
               <tr>
                 <th className="px-4 py-3.5">Discente / Curso</th>
                 <th className="px-3 py-3.5">Vaga Atual</th>
@@ -185,21 +185,21 @@ export default function RecadastramentoView({
                 <tr key={morador.id} className="hover:bg-slate-50/80 transition">
                   <td className="px-4 py-3">
                     <strong className="text-slate-900 font-bold block">{morador.nome}</strong>
-                    <span className="text-[11px] text-slate-500 font-mono">
+                    <span className="text-xs text-slate-500 font-mono">
                       {morador.matricula} • {morador.curso}
                     </span>
                   </td>
 
                   <td className="px-3 py-3">
                     <span className="font-semibold text-slate-800">{morador.quarto}</span>
-                    <span className="text-slate-500 text-[11px] block">{morador.camaId}</span>
+                    <span className="text-slate-500 text-xs block">{morador.camaId}</span>
                   </td>
 
                   <td className="px-3 py-3 text-slate-600">{morador.campusNome}</td>
 
                   <td className="px-3 py-3 text-center">
                     <span
-                      className={`inline-block px-2.5 py-1 rounded-full font-bold text-[11px] border ${getStatusBadge(
+                      className={`inline-block px-2.5 py-1 rounded-full font-bold text-xs border ${getStatusBadge(
                         morador.recadastramentoStatus
                       )}`}
                     >
@@ -211,7 +211,7 @@ export default function RecadastramentoView({
                     <span
                       className={`font-semibold ${
                         morador.componentesMatriculados >= 4
-                          ? 'text-emerald-700'
+                          ? 'text-ufersa-green-700'
                           : 'text-rose-700 font-bold'
                       }`}
                     >
@@ -223,12 +223,12 @@ export default function RecadastramentoView({
                     {morador.recadastramentoStatus === 'Desligamento Pendente' ? (
                       <button
                         onClick={() => onOpenDesligamento(morador)}
-                        className="px-2.5 py-1 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-lg text-[11px] transition shadow-2xs"
+                        className="px-2.5 py-1 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-lg text-xs transition shadow-2xs"
                       >
                         Executar Desligamento
                       </button>
                     ) : (
-                      <span className="text-slate-400 text-[11px] italic">Em conformidade</span>
+                      <span className="text-slate-400 text-xs italic">Em conformidade</span>
                     )}
                   </td>
                 </tr>

@@ -34,23 +34,23 @@ export default function TermoCompromissoModal({
       <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
         
         {/* Header Oficial UFERSA */}
-        <div className="bg-emerald-900 text-white px-6 py-4 flex items-center justify-between">
+        <div className="bg-ufersa-green-900 text-white px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-800 flex items-center justify-center text-amber-400 font-bold border border-emerald-700">
+            <div className="w-9 h-9 rounded-lg bg-ufersa-green-800 flex items-center justify-center text-amber-400 font-bold border border-ufersa-green-700">
               <FileText className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-bold tracking-tight">
                 Termo de Compromisso e Ocupação de Vaga
               </h3>
-              <p className="text-xs text-emerald-200">
+              <p className="text-xs text-ufersa-green-200">
                 PROAE • Residência Universitária da UFERSA
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-emerald-200 hover:text-white hover:bg-emerald-800 transition"
+            className="p-1 rounded-lg text-ufersa-green-200 hover:text-white hover:bg-ufersa-green-800 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -67,7 +67,7 @@ export default function TermoCompromissoModal({
             <p className="text-xs font-serif text-slate-600">
               PRÓ-REITORIA DE ASSUNTOS ESTUDANTIS - PROAE
             </p>
-            <p className="text-xs font-semibold text-emerald-800 mt-1 uppercase">
+            <p className="text-xs font-semibold text-ufersa-green-800 mt-1 uppercase">
               TERMO DE CONCESSÃO E COMPROMISSO DE MORADIA ESTUDANTIL
             </p>
           </div>
@@ -88,7 +88,7 @@ export default function TermoCompromissoModal({
             </div>
             <div>
               <span className="text-slate-500 font-medium">Unidade Concedida:</span>{' '}
-              <span className="text-slate-900 font-semibold text-emerald-800">
+              <span className="text-slate-900 font-semibold text-ufersa-green-800">
                 {morador.quarto} • {morador.camaId} ({morador.campusNome})
               </span>
             </div>
@@ -100,7 +100,7 @@ export default function TermoCompromissoModal({
               Pelo presente instrumento, o discente compromete-se a cumprir integralmente as normas vigentes:
             </p>
 
-            <div className="border-l-2 border-emerald-600 pl-3 py-1 space-y-1">
+            <div className="border-l-2 border-ufersa-green-600 pl-3 py-1 space-y-1">
               <strong className="text-slate-800 block">1. Exigência de Matrícula Mínima Regular:</strong>
               <p>O discente declara manter matrícula ativa em, no mínimo, 4 (quatro) componentes curriculares por semestre letivo regular.</p>
             </div>
@@ -125,7 +125,7 @@ export default function TermoCompromissoModal({
               <p>É expressamente vedada a cumulação da Moradia Estudantil com o Auxílio Transporte concedido pela assistência estudantil da UFERSA.</p>
             </div>
 
-            <div className="border-l-2 border-emerald-700 pl-3 py-1 space-y-1">
+            <div className="border-l-2 border-ufersa-green-700 pl-3 py-1 space-y-1">
               <strong className="text-slate-800 block">6. Obrigatoriedade de Renovação e Recadastramento Semestral:</strong>
               <p>A não submissão do formulário de recadastramento no prazo estipulado resultará na perda da vaga e alteração imediata para status &quot;Desligamento Pendente&quot;.</p>
             </div>
@@ -136,8 +136,8 @@ export default function TermoCompromissoModal({
             <div>
               <span className="text-xs text-slate-500 block">Status da Assinatura:</span>
               {morador.termoAssinado ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-ufersa-green-700">
+                  <CheckCircle className="w-4 h-4 text-ufersa-green-600" />
                   Assinado Eletronicamente (Autenticado SIGAA)
                 </span>
               ) : (
@@ -151,8 +151,8 @@ export default function TermoCompromissoModal({
             <div>
               <span className="text-xs text-slate-500 block">Posse Física da Vaga:</span>
               {morador.status === 'Ativo' ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-ufersa-green-700">
+                  <CheckCircle className="w-4 h-4 text-ufersa-green-600" />
                   Posse Confirmada em {morador.dataPosse || '15/03/2022'}
                 </span>
               ) : (
@@ -165,15 +165,15 @@ export default function TermoCompromissoModal({
 
           {/* Checkbox para assinatura pelo aluno */}
           {!morador.termoAssinado && currentRole === 'morador' && (
-            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+            <div className="p-3 bg-ufersa-green-50 rounded-xl border border-ufersa-green-200">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={concordou}
                   onChange={(e) => setConcordou(e.target.checked)}
-                  className="mt-1 rounded border-emerald-400 text-emerald-600 focus:ring-emerald-500"
+                  className="mt-1 rounded border-ufersa-green-400 text-ufersa-green-600 focus:ring-ufersa-green-500"
                 />
-                <span className="text-xs text-emerald-950">
+                <span className="text-xs text-ufersa-green-950">
                   Declaro que li, compreendi e concordo integralmente com todas as cláusulas do Termo de Concessão de Moradia Estudantil da UFERSA, sob pena de perda imediata do benefício.
                 </span>
               </label>
@@ -181,7 +181,7 @@ export default function TermoCompromissoModal({
           )}
 
           {assinadoSucesso && (
-            <div className="p-3 bg-emerald-600 text-white rounded-xl text-center text-xs font-bold flex items-center justify-center gap-2">
+            <div className="p-3 bg-ufersa-green-600 text-white rounded-xl text-center text-xs font-bold flex items-center justify-center gap-2">
               <CheckCircle className="w-4 h-4" />
               Termo assinado eletronicamente com sucesso! Hash criptográfico registrado.
             </div>
@@ -222,7 +222,7 @@ export default function TermoCompromissoModal({
                 disabled={!concordou}
                 className={`px-4 py-2 rounded-xl text-xs font-bold text-white shadow-sm flex items-center gap-1.5 transition ${
                   concordou
-                    ? 'bg-emerald-700 hover:bg-emerald-800'
+                    ? 'bg-ufersa-green-700 hover:bg-ufersa-green-800'
                     : 'bg-slate-400 cursor-not-allowed'
                 }`}
               >

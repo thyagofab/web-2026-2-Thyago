@@ -12,15 +12,30 @@ export default function NewDemandModal({
   const [prioridade, setPrioridade] = useState('Média');
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [errors, setErrors] = useState({});
 
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!titulo || !descricao) {
-      alert('Por favor preencha todos os campos obrigatórios.');
+
+    const newErrors = {};
+    if (!titulo.trim()) {
+      newErrors.titulo = 'Informe um título resumido do problema.';
+    } else if (titulo.trim().length < 5) {
+      newErrors.titulo = 'O título deve ter pelo menos 5 caracteres.';
+    }
+    if (!descricao.trim()) {
+      newErrors.descricao = 'Descreva o problema com mais detalhes.';
+    } else if (descricao.trim().length < 15) {
+      newErrors.descricao = 'Descreva com mais detalhes (mínimo 15 caracteres) para agilizar o atendimento.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     const novaDemanda = {
       id: `DEM-2026-${String(Math.floor(Math.random() * 900) + 100)}`,
@@ -44,6 +59,7 @@ export default function NewDemandModal({
     onSaveDemand(novaDemanda);
     setTitulo('');
     setDescricao('');
+    setErrors({});
     onClose();
   };
 
@@ -52,27 +68,27 @@ export default function NewDemandModal({
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
         
         {/* Header */}
-        <div className="bg-emerald-800 text-white px-6 py-4 flex items-center justify-between">
+        <div className="bg-ufersa-green-800 text-white px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-700 flex items-center justify-center text-amber-300">
+            <div className="w-8 h-8 rounded-lg bg-ufersa-green-700 flex items-center justify-center text-amber-300">
               <Wrench className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-bold">
                 {currentRole === 'morador' ? 'Nova Solicitação de Atendimento' : 'Cadastrar Demanda de Vistoria'}
               </h3>
-              <p className="text-xs text-emerald-200">
+              <p className="text-xs text-ufersa-green-200">
                 Canal de Atendimento Contínuo às Residências da UFERSA
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-emerald-200 hover:text-white hover:bg-emerald-700">
+          <button onClick={onClose} className="p-1 rounded-lg text-ufersa-green-200 hover:text-white hover:bg-ufersa-green-700">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-sm">
           
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -80,7 +96,7 @@ export default function NewDemandModal({
               <select
                 value={tipo}
                 onChange={(e) => setTipo(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ufersa-green-500 focus:outline-none"
               >
                 <option>Manutenção Predial</option>
                 <option>Elétrica / Iluminação</option>
@@ -96,7 +112,7 @@ export default function NewDemandModal({
               <select
                 value={prioridade}
                 onChange={(e) => setPrioridade(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ufersa-green-500 focus:outline-none"
               >
                 <option>Baixa</option>
                 <option>Média</option>
@@ -114,8 +130,14 @@ export default function NewDemandModal({
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Ex: Chuveiro elétrico parou de aquecer no Bloco B"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium"
+              aria-invalid={Boolean(errors.titulo)}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:outline-none font-medium ${
+                errors.titulo ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-300 focus:ring-ufersa-green-500'
+              }`}
             />
+            {errors.titulo && (
+              <p className="mt-1 text-xs font-semibold text-rose-600">{errors.titulo}</p>
+            )}
           </div>
 
           <div>
@@ -126,13 +148,24 @@ export default function NewDemandModal({
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Descreva detalhadamente o ocorrido, localização exata (cômodo, quarto ou área comum) e quando começou..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              aria-invalid={Boolean(errors.descricao)}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
+                errors.descricao ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-300 focus:ring-ufersa-green-500'
+              }`}
             />
+            <div className="flex items-center justify-between mt-1">
+              {errors.descricao ? (
+                <p className="text-xs font-semibold text-rose-600">{errors.descricao}</p>
+              ) : (
+                <span />
+              )}
+              <span className="text-xs text-slate-400">{descricao.trim().length} caracteres</span>
+            </div>
           </div>
 
           <div className="bg-sky-50 border border-sky-200 rounded-xl p-3 flex items-start gap-2 text-sky-900">
             <Clock className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] leading-relaxed">
+            <p className="text-xs leading-relaxed">
               <strong>Canal Direto COAE/PROAE:</strong> As demandas registradas são encaminhadas em tempo real para a equipe técnica do seu campus. O acompanhamento de respostas e status poderá ser feito nesta mesma tela.
             </p>
           </div>
@@ -148,7 +181,7 @@ export default function NewDemandModal({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition"
+              className="px-4 py-2 bg-ufersa-green-700 hover:bg-ufersa-green-800 text-white font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition"
             >
               <Send className="w-4 h-4" />
               Registrar Demanda

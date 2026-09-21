@@ -59,7 +59,7 @@ export default function Sidebar({
       sublabel: 'Campanhas de Renovação',
       icon: ClipboardList,
       badge: '2026.1',
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      badgeColor: 'bg-ufersa-green-100 text-ufersa-green-800 border-ufersa-green-300',
     },
     {
       id: 'demands',
@@ -75,7 +75,7 @@ export default function Sidebar({
       sublabel: 'Visão do Aluno Residente',
       icon: User,
       badge: 'Discente',
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      badgeColor: 'bg-ufersa-green-100 text-ufersa-green-800 border-ufersa-green-300',
     },
     {
       id: 'audit_logs',
@@ -93,7 +93,7 @@ export default function Sidebar({
       sublabel: 'Dados da Vaga & Concessão',
       icon: User,
       badge: 'Ativo',
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      badgeColor: 'bg-ufersa-green-100 text-ufersa-green-800 border-ufersa-green-300',
     },
     {
       id: 'demands',
@@ -145,7 +145,7 @@ export default function Sidebar({
       >
         {/* Navigation List */}
         <div className="p-4 space-y-1.5 overflow-y-auto flex-1">
-          <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
             {isStudent ? 'Menu do Morador' : 'Módulos de Gestão'}
           </div>
 
@@ -159,7 +159,7 @@ export default function Sidebar({
                 onClick={() => handleSelect(item.id)}
                 className={`w-full text-left flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-150 group ${
                   isActive
-                    ? 'bg-emerald-50 text-emerald-950 font-semibold shadow-xs border border-emerald-200'
+                    ? 'bg-ufersa-blue-50 text-ufersa-blue-950 font-semibold shadow-xs border border-ufersa-blue-200'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
@@ -167,23 +167,23 @@ export default function Sidebar({
                   <div
                     className={`p-2 rounded-lg transition-colors ${
                       isActive
-                        ? 'bg-emerald-700 text-white shadow-xs'
+                        ? 'bg-ufersa-blue-700 text-white shadow-xs'
                         : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-800'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
                   <div className="truncate">
-                    <p className={`text-xs leading-tight ${isActive ? 'text-emerald-950 font-bold' : 'text-slate-800'}`}>
+                    <p className={`text-sm leading-tight ${isActive ? 'text-ufersa-blue-950 font-bold' : 'text-slate-800 font-medium'}`}>
                       {item.label}
                     </p>
-                    <p className="text-[11px] text-slate-500 truncate mt-0.5">{item.sublabel}</p>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">{item.sublabel}</p>
                   </div>
                 </div>
 
                 {item.badge && (
                   <span
-                    className={`ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
+                    className={`ml-2 text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ${
                       item.badgeColor || 'bg-slate-100 text-slate-700 border-slate-200'
                     }`}
                   >
@@ -197,17 +197,17 @@ export default function Sidebar({
 
         {/* Footer info box: Normativas UFERSA */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/70">
-          <div className="bg-emerald-900/5 rounded-xl p-3.5 border border-emerald-900/10">
-            <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs mb-1">
+          <div className="bg-ufersa-green-900/5 rounded-xl p-3.5 border border-ufersa-green-900/10">
+            <div className="flex items-center gap-2 text-ufersa-green-800 font-bold text-xs mb-1">
               <Clock className="w-3.5 h-3.5" />
               <span>Semestre Letivo 2026.1</span>
             </div>
-            <p className="text-[11px] text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               Normativas da Pró-Reitoria de Assuntos Estudantis e Regimento Geral das Moradias Estudantis.
             </p>
-            <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-emerald-800 font-medium">
+            <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs text-ufersa-green-800 font-medium">
               <span>PROAE / COAE</span>
-              <span className="text-[11px] text-slate-500 font-medium">UFERSA</span>
+              <span className="text-xs text-slate-500 font-medium">UFERSA</span>
             </div>
           </div>
         </div>

@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+/*
+ * Paleta institucional da UFERSA
+ * Fonte: Manual de Identidade Visual da UFERSA (Assessoria de Comunicação)
+ * Azul Ufersa oficial: C:100 M:89 Y:22 K:13 / R:28 G:60 B:132 (#1C3C84)
+ * Verde Ufersa oficial: C:49 M:3 Y:100 K:0 / R:148 G:195 B:72 (#94C348)
+ * As escalas abaixo derivam dessas duas cores oficiais para uso consistente
+ * em toda a interface (fundo, texto, bordas, estados de hover, etc.).
+ */
+@theme {
+  --color-ufersa-blue-50: #eef2fb;
+  --color-ufersa-blue-100: #d7e0f5;
+  --color-ufersa-blue-200: #b0c1eb;
+  --color-ufersa-blue-300: #839cdd;
+  --color-ufersa-blue-400: #5470b9;
+  --color-ufersa-blue-500: #2f4e9c;
+  --color-ufersa-blue-600: #223f87;
+  --color-ufersa-blue-700: #1c3c84;
+  --color-ufersa-blue-800: #17316b;
+  --color-ufersa-blue-900: #122552;
+  --color-ufersa-blue-950: #0b1730;
+
+  --color-ufersa-green-50: #f4faec;
+  --color-ufersa-green-100: #e6f3d3;
+  --color-ufersa-green-200: #cfe7a9;
+  --color-ufersa-green-300: #b4d87a;
+  --color-ufersa-green-400: #9fcb58;
+  --color-ufersa-green-500: #94c348;
+  --color-ufersa-green-600: #7baa37;
+  --color-ufersa-green-700: #628a2c;
+  --color-ufersa-green-800: #4e6f25;
+  --color-ufersa-green-900: #3e5920;
+  --color-ufersa-green-950: #23330f;
+}

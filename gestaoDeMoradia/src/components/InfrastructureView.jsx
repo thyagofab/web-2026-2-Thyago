@@ -5,6 +5,7 @@ import {
   UserPlus,
   UserX,
   FileText,
+  Plus,
 } from 'lucide-react';
 
 export default function InfrastructureView({
@@ -14,6 +15,7 @@ export default function InfrastructureView({
   onOpenAllocate,
   onOpenTermo,
   onOpenDesligamento,
+  onOpenNewRoom,
 }) {
   const [filterAla, setFilterAla] = useState('todas');
   const [filterStatus, setFilterStatus] = useState('todos');
@@ -37,7 +39,7 @@ export default function InfrastructureView({
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Livre':
-        return 'bg-emerald-50 text-emerald-800 border-emerald-300';
+        return 'bg-ufersa-green-50 text-ufersa-green-800 border-ufersa-green-300';
       case 'Ocupada':
         return 'bg-slate-100 text-slate-800 border-slate-200';
       case 'Desocupação Iminente':
@@ -59,7 +61,7 @@ export default function InfrastructureView({
             <h1 className="text-xl font-black text-slate-900 tracking-tight">
               Gestão de Infraestrutura e Vagas
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-ufersa-green-100 text-ufersa-green-800 border border-ufersa-green-200">
               {filteredRooms.length} Quartos Mapeados
             </span>
           </div>
@@ -68,10 +70,18 @@ export default function InfrastructureView({
           </p>
         </div>
 
+        <button
+          onClick={onOpenNewRoom}
+          className="px-3.5 py-2 bg-ufersa-green-700 hover:bg-ufersa-green-800 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          Cadastrar Novo Quarto
+        </button>
+
         {/* Legenda de Status */}
-        <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Livre (Disponível)
+        <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ufersa-green-50 text-ufersa-green-800 border border-ufersa-green-200">
+            <span className="w-2 h-2 rounded-full bg-ufersa-green-500"></span> Livre (Disponível)
           </span>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
             <span className="w-2 h-2 rounded-full bg-slate-500"></span> Ocupada (Ativa)
@@ -94,7 +104,7 @@ export default function InfrastructureView({
             <select
               value={filterAla}
               onChange={(e) => setFilterAla(e.target.value)}
-              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-ufersa-green-500"
             >
               <option value="todas">Todas as Alas</option>
               <option value="masculina">Ala Masculina</option>
@@ -108,7 +118,7 @@ export default function InfrastructureView({
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-ufersa-green-500"
             >
               <option value="todos">Todos os Status</option>
               <option value="Livre">Apenas Leitos Livres</option>
@@ -129,24 +139,24 @@ export default function InfrastructureView({
         {filteredRooms.map((room) => (
           <div
             key={room.id}
-            className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between hover:border-emerald-300 transition"
+            className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between hover:border-ufersa-green-300 transition"
           >
             {/* Header do Quarto */}
             <div className="p-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-800 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-ufersa-green-800 text-white flex items-center justify-center font-bold text-xs shadow-xs">
                   {room.numero.replace('Quarto ', 'Q')}
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">{room.numero}</h3>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-xs text-slate-500">
                     {room.bloco} • {room.campusId === 'mossoro' ? 'Campus Mossoró' : room.campusId}
                   </p>
                 </div>
               </div>
 
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                   room.ala.toLowerCase().includes('masc')
                     ? 'bg-blue-50 text-blue-800 border-blue-200'
                     : room.ala.toLowerCase().includes('fem')
@@ -170,7 +180,7 @@ export default function InfrastructureView({
                     key={cama.id}
                     className={`p-3 rounded-xl border transition flex flex-col gap-2 ${
                       cama.status === 'Livre'
-                        ? 'border-dashed border-emerald-300 bg-emerald-50/30'
+                        ? 'border-dashed border-ufersa-green-300 bg-ufersa-green-50/30'
                         : cama.status === 'Desocupação Iminente'
                         ? 'border-amber-300 bg-amber-50/40'
                         : cama.status === 'Manutenção'
@@ -185,7 +195,7 @@ export default function InfrastructureView({
                         <span className="text-xs font-bold text-slate-800">{cama.numero}</span>
                       </div>
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusBadge(
+                        className={`text-xs font-bold px-2 py-0.5 rounded-full border ${getStatusBadge(
                           cama.status
                         )}`}
                       >
@@ -200,18 +210,18 @@ export default function InfrastructureView({
                           <strong className="text-slate-900 font-semibold truncate">
                             {morador.nome}
                           </strong>
-                          <span className="text-[10px] text-slate-500 font-mono">
+                          <span className="text-xs text-slate-500 font-mono">
                             {morador.matricula}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-600 truncate">{morador.curso}</p>
+                        <p className="text-xs text-slate-600 truncate">{morador.curso}</p>
 
                         {/* Status de Posse e Avisos */}
                         <div className="flex flex-wrap items-center gap-1.5 mt-1">
                           <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                            className={`text-xs px-1.5 py-0.5 rounded font-semibold ${
                               morador.status === 'Ativo'
-                                ? 'bg-emerald-100 text-emerald-800'
+                                ? 'bg-ufersa-green-100 text-ufersa-green-800'
                                 : 'bg-sky-100 text-sky-800'
                             }`}
                           >
@@ -219,13 +229,13 @@ export default function InfrastructureView({
                           </span>
 
                           {morador.desocupacaoIminente && (
-                            <span className="text-[10px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-semibold">
+                            <span className="text-xs bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-semibold">
                               Prazo Limite
                             </span>
                           )}
 
                           {morador.reprovacaoFalta && (
-                            <span className="text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.2 rounded font-semibold">
+                            <span className="text-xs bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded font-semibold">
                               Reprov. Falta
                             </span>
                           )}
@@ -235,15 +245,15 @@ export default function InfrastructureView({
                         <div className="flex items-center justify-end gap-1.5 mt-2 pt-1 border-t border-slate-100">
                           <button
                             onClick={() => onOpenTermo(morador)}
-                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold flex items-center gap-1"
+                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold flex items-center gap-1"
                             title="Visualizar Termo de Compromisso"
                           >
-                            <FileText className="w-3 h-3 text-emerald-700" />
+                            <FileText className="w-3 h-3 text-ufersa-green-700" />
                             Termo
                           </button>
                           <button
                             onClick={() => onOpenDesligamento(morador)}
-                            className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[11px] font-semibold flex items-center gap-1"
+                            className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-xs font-semibold flex items-center gap-1"
                             title="Desligar morador e liberar vaga"
                           >
                             <UserX className="w-3 h-3" />
@@ -255,14 +265,14 @@ export default function InfrastructureView({
                       <div className="pt-2 text-center">
                         <button
                           onClick={() => onOpenAllocate(cama, room)}
-                          className="w-full py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs"
+                          className="w-full py-1.5 bg-ufersa-green-700 hover:bg-ufersa-green-800 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
                           Alocar Convocado
                         </button>
                       </div>
                     ) : (
-                      <p className="text-[11px] text-orange-700 italic pt-1">
+                      <p className="text-xs text-orange-700 italic pt-1">
                         Leito temporariamente indisponível para manutenção da infraestrutura predial.
                       </p>
                     )}
@@ -272,7 +282,7 @@ export default function InfrastructureView({
             </div>
 
             {/* Footer do Card com capacidade */}
-            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200/80 text-[11px] text-slate-500 flex items-center justify-between">
+            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200/80 text-xs text-slate-500 flex items-center justify-between">
               <span>Capacidade Total: {room.capacidade} leitos</span>
               <span className="font-semibold text-slate-700">
                 {room.camas.filter((c) => c.status === 'Livre').length} leitos livres
