@@ -24,11 +24,15 @@ export default function NewDemandModal({
       newErrors.titulo = 'Informe um título resumido do problema.';
     } else if (titulo.trim().length < 5) {
       newErrors.titulo = 'O título deve ter pelo menos 5 caracteres.';
+    } else if (titulo.trim().length > 120) {
+      newErrors.titulo = 'O título deve ter no máximo 120 caracteres.';
     }
     if (!descricao.trim()) {
       newErrors.descricao = 'Descreva o problema com mais detalhes.';
     } else if (descricao.trim().length < 15) {
       newErrors.descricao = 'Descreva com mais detalhes (mínimo 15 caracteres) para agilizar o atendimento.';
+    } else if (descricao.trim().length > 2000) {
+      newErrors.descricao = 'A descrição deve ter no máximo 2000 caracteres.';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -46,8 +50,8 @@ export default function NewDemandModal({
       campusNome: currentUser?.campusNome || 'Campus Mossoró',
       quarto: currentUser ? `${currentUser.quarto} (${currentUser.ala})` : 'Quarto 101 - Ala Masc.',
       tipo,
-      titulo,
-      descricao,
+      titulo: titulo.trim(),
+      descricao: descricao.trim(),
       prioridade,
       status: 'Pendente',
       dataAbertura: new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }),
@@ -127,6 +131,7 @@ export default function NewDemandModal({
             <input
               type="text"
               required
+              maxLength={120}
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Ex: Chuveiro elétrico parou de aquecer no Bloco B"
@@ -145,6 +150,7 @@ export default function NewDemandModal({
             <textarea
               rows={4}
               required
+              maxLength={2000}
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Descreva detalhadamente o ocorrido, localização exata (cômodo, quarto ou área comum) e quando começou..."

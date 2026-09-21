@@ -27,14 +27,20 @@ export default function NewRoomModal({ isOpen, onClose, campi, onConfirmCreateRo
 
     const newErrors = {};
     if (!campusId) newErrors.campusId = 'Selecione o campus.';
-    if (!numero.trim()) {
+    const numeroNormalizado = numero.trim();
+    const blocoNormalizado = bloco.trim();
+    if (!numeroNormalizado) {
       newErrors.numero = 'Informe o número/identificação do quarto.';
+    } else if (!/^[A-Za-z0-9][A-Za-z0-9 -]{0,19}$/.test(numeroNormalizado)) {
+      newErrors.numero = 'Use até 20 caracteres, com letras, números, espaços ou hífen.';
     }
-    if (!bloco.trim()) {
+    if (!blocoNormalizado) {
       newErrors.bloco = 'Informe o bloco ou nome do prédio.';
+    } else if (blocoNormalizado.length > 60) {
+      newErrors.bloco = 'O bloco/prédio deve ter no máximo 60 caracteres.';
     }
     const capacidadeNum = Number(capacidade);
-    if (!capacidadeNum || capacidadeNum < 1 || capacidadeNum > 8) {
+    if (!Number.isInteger(capacidadeNum) || capacidadeNum < 1 || capacidadeNum > 8) {
       newErrors.capacidade = 'A capacidade deve ser um número entre 1 e 8 leitos.';
     }
 
@@ -53,11 +59,11 @@ export default function NewRoomModal({ isOpen, onClose, campi, onConfirmCreateRo
     }));
 
     const novoQuarto = {
-      id: `${numero.trim()}-${Date.now().toString().slice(-4)}`,
-      numero: `Quarto ${numero.trim()}`,
+      id: `${numeroNormalizado}-${Date.now().toString().slice(-4)}`,
+      numero: `Quarto ${numeroNormalizado}`,
       campusId,
       ala,
-      bloco: bloco.trim(),
+      bloco: blocoNormalizado,
       capacidade: capacidadeNum,
       camas,
     };
@@ -110,6 +116,7 @@ export default function NewRoomModal({ isOpen, onClose, campi, onConfirmCreateRo
               <label className="block font-semibold text-slate-700 mb-1">Número do Quarto:</label>
               <input
                 type="text"
+                maxLength={20}
                 value={numero}
                 onChange={(e) => setNumero(e.target.value)}
                 placeholder="Ex: 103"
@@ -139,6 +146,7 @@ export default function NewRoomModal({ isOpen, onClose, campi, onConfirmCreateRo
               <label className="block font-semibold text-slate-700 mb-1">Bloco / Prédio:</label>
               <input
                 type="text"
+                maxLength={60}
                 value={bloco}
                 onChange={(e) => setBloco(e.target.value)}
                 placeholder="Ex: Bloco A"

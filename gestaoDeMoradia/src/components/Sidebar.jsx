@@ -120,7 +120,11 @@ export default function Sidebar({
     },
   ];
 
-  const itemsToRender = isStudent ? studentNavItems : managerNavItems;
+  const itemsToRender = isStudent
+    ? studentNavItems
+    : currentRole === 'gestor_coae'
+    ? managerNavItems.filter((item) => !['audit_logs', 'student_portal'].includes(item.id))
+    : managerNavItems;
 
   const handleSelect = (id) => {
     setActiveTab(id);

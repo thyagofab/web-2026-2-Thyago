@@ -61,6 +61,10 @@ export default function StudentPortalView({
 
   const handleSubmeterComprovante = (e) => {
     e.preventDefault();
+    if (!Number.isInteger(Number(componentesInput)) || Number(componentesInput) < 4 || Number(componentesInput) > 10) {
+      setErroComprovante('Informe entre 4 e 10 disciplinas matriculadas.');
+      return;
+    }
     if (!arquivoComprovante) {
       setErroComprovante('Anexe o PDF do atestado de matrícula antes de enviar.');
       return;
@@ -78,6 +82,14 @@ export default function StudentPortalView({
       setErroRecadastramento(
         'Seu recadastramento está bloqueado devido a registro de trancamento de matrícula no semestre.'
       );
+      return;
+    }
+    if (!confirmaInteresse) {
+      setErroRecadastramento('Confirme seu interesse em permanecer na moradia.');
+      return;
+    }
+    if (!/^\d{4}\.\d+\s+\(Semestre\s+\d+\)$/.test(previsaoConclusao.trim())) {
+      setErroRecadastramento('Informe a previsão no formato 2026.2 (Semestre 8).');
       return;
     }
     const telefoneDigits = telefoneContato.replace(/\D/g, '');
@@ -208,10 +220,11 @@ export default function StudentPortalView({
                 <span className="text-slate-700 font-medium">Disciplinas Matriculadas:</span>
                 <input
                   type="number"
-                  min="1"
+                  min="4"
                   max="10"
                   value={componentesInput}
-                  onChange={(e) => setComponentesInput(Number(e.target.value))}
+                  required
+                  onChange={(e) => setComponentesInput(e.target.value)}
                   className="w-16 px-2 py-1 bg-white border border-slate-300 rounded text-center text-xs font-bold focus:outline-none"
                 />
               </div>
@@ -334,6 +347,8 @@ export default function StudentPortalView({
                 <label className="block font-semibold text-slate-700 mb-1">Previsão de Conclusão do Curso:</label>
                 <input
                   type="text"
+                  required
+                  placeholder="2026.2 (Semestre 8)"
                   value={previsaoConclusao}
                   onChange={(e) => setPrevisaoConclusao(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none"

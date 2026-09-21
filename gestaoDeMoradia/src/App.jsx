@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import DashboardView from './components/DashboardView';
@@ -26,12 +26,76 @@ import {
   INITIAL_LOGS,
 } from './data/mockData';
 
+const TAB_PATHS = {
+  dashboard: '/dashboard',
+  infrastructure: '/infraestrutura',
+  allocations: '/alocacoes',
+  academic: '/academico',
+  recadastramento: '/recadastramento',
+  demands: '/demandas',
+  student_portal: '/portal-morador',
+  audit_logs: '/auditoria',
+};
+
+const ROLE_PERMISSIONS = {
+  gestor_proae: Object.keys(TAB_PATHS),
+  gestor_coae: ['dashboard', 'infrastructure', 'allocations', 'academic', 'demands'],
+  morador: ['student_portal', 'demands', 'recadastramento', 'academic'],
+};
+
+const PATH_TABS = Object.fromEntries(
+  Object.entries(TAB_PATHS).flatMap(([tab, path]) => [
+    [path, tab],
+    [`/gestao${path}`, tab],
+  ])
+);
+
+function getTabFromPath(pathname) {
+  return PATH_TABS[pathname] || 'dashboard';
+}
+
 export default function App() {
   // Estado do Perfil e Campus ativo
   const [currentRole, setCurrentRole] = useState('gestor_proae'); // 'gestor_proae', 'gestor_coae', 'morador'
   const [selectedCampus, setSelectedCampus] = useState('todos');
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => getTabFromPath(window.location.pathname));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const initialTab = getTabFromPath(window.location.pathname);
+    const allowedTabs = ROLE_PERMISSIONS[currentRole];
+    const safeTab = allowedTabs.includes(initialTab) ? initialTab : allowedTabs[0];
+    if (window.location.pathname !== TAB_PATHS[safeTab]) {
+      window.history.replaceState(null, '', TAB_PATHS[safeTab]);
+    }
+    const handlePopState = () => {
+      const requestedTab = getTabFromPath(window.location.pathname);
+      const nextTab = allowedTabs.includes(requestedTab) ? requestedTab : allowedTabs[0];
+      if (nextTab !== requestedTab) {
+        window.history.replaceState(null, '', TAB_PATHS[nextTab]);
+      }
+      setActiveTab(nextTab);
+      setMobileMenuOpen(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentRole]);
+
+  const navigateToTab = (tab) => {
+    const path = TAB_PATHS[tab];
+    if (!path) return;
+    if (!ROLE_PERMISSIONS[currentRole].includes(tab)) {
+      window.alert('Seu perfil não possui permissão para acessar esta página.');
+      return;
+    }
+
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, '', path);
+    }
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+  };
 
   // Estados dos Dados Centrais
   const [rooms, setRooms] = useState(INITIAL_ROOMS);
@@ -316,12 +380,12 @@ export default function App() {
         setCurrentRole={(role) => {
           setCurrentRole(role);
           if (role === 'morador') {
-            setActiveTab('student_portal');
+            navigateToTab('student_portal');
           } else if (role === 'gestor_coae') {
             setSelectedCampus('mossoro');
-            if (activeTab === 'student_portal') setActiveTab('dashboard');
+            if (activeTab === 'student_portal') navigateToTab('dashboard');
           } else if (activeTab === 'student_portal') {
-            setActiveTab('dashboard');
+            navigateToTab('dashboard');
           }
         }}
         selectedCampus={selectedCampus}
@@ -330,7 +394,7 @@ export default function App() {
         imminentVacanciesCount={imminentVacanciesCount}
         academicAlertsCount={academicAlertsCount}
         pendingDemandsCount={pendingDemandsCount}
-        onNavigate={(tab) => setActiveTab(tab)}
+        onNavigate={navigateToTab}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
@@ -341,7 +405,7 @@ export default function App() {
         {/* Sidebar Navigation */}
         <Sidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={navigateToTab}
           currentRole={currentRole}
           imminentVacanciesCount={imminentVacanciesCount}
           academicAlertsCount={academicAlertsCount}
@@ -358,7 +422,7 @@ export default function App() {
               residents={residents}
               demands={demands}
               selectedCampus={selectedCampus}
-              onNavigate={setActiveTab}
+              onNavigate={navigateToTab}
             />
           )}
 
