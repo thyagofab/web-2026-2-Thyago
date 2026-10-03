@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Building2, Bell, ChevronDown, AlertTriangle, CheckCircle2, Menu, X, MapPin } from 'lucide-react';
+import { Building2, Bell, AlertTriangle, CheckCircle2, Menu, X, MapPin, UserPlus, LogOut } from 'lucide-react';
 
 export default function Navbar({
   currentRole,
-  setCurrentRole,
   selectedCampus,
   setSelectedCampus,
   campi,
@@ -13,6 +12,9 @@ export default function Navbar({
   onNavigate,
   mobileMenuOpen,
   setMobileMenuOpen,
+  currentUser,
+  onLogout,
+  onOpenCadastrarMembro,
 }) {
   const totalNotifications = imminentVacanciesCount + academicAlertsCount + pendingDemandsCount;
   const [notifOpen, setNotifOpen] = useState(false);
@@ -183,45 +185,45 @@ export default function Navbar({
               )}
             </div>
 
+            {/* Ação Exclusiva da PROAE: Cadastrar Novo Membro */}
+            {currentRole === 'gestor_proae' && (
+              <button
+                onClick={onOpenCadastrarMembro}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-ufersa-green-500 hover:bg-ufersa-green-400 text-slate-950 font-bold rounded-xl text-xs shadow-xs transition cursor-pointer"
+                title="Cadastrar Novo Membro no Sistema (Exclusivo PROAE)"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Novo Membro</span>
+              </button>
+            )}
+
             {/* Profile / Role Selector */}
             <div className="flex items-center gap-2 bg-ufersa-blue-950/70 p-1.5 rounded-xl border border-ufersa-blue-700/60">
               <div className="hidden sm:flex flex-col text-right pl-2">
-                <span className="text-xs font-bold text-white leading-tight">
-                  {currentRole === 'gestor_proae'
-                    ? 'Coordenação Central'
-                    : currentRole === 'gestor_coae'
-                    ? 'Equipe Mossoró'
-                    : 'Thyago Fernandes'}
+                <span className="text-xs font-bold text-white leading-tight truncate max-w-[140px]">
+                  {currentUser?.nome || (
+                    currentRole === 'gestor_proae'
+                      ? 'Coordenação Central'
+                      : currentRole === 'gestor_coae'
+                      ? 'Equipe Mossoró'
+                      : 'Thyago Fernandes'
+                  )}
                 </span>
-                <span className="text-xs text-ufersa-blue-300 leading-tight">
-                  {currentRole === 'morador' ? 'Morador Residente' : 'Gestão PROAE / COAE'}
+                <span className="text-[11px] text-ufersa-blue-300 leading-tight">
+                  {currentRole === 'gestor_proae' ? 'Gestão PROAE' : currentRole === 'gestor_coae' ? 'Gestão COAE' : 'Morador Residente'}
                 </span>
               </div>
 
-              <div className="relative">
-                <select
-                  value={currentRole}
-                  onChange={(e) => {
-                    const newRole = e.target.value;
-                    setCurrentRole(newRole);
-                    if (newRole === 'morador') {
-                      onNavigate('student_portal');
-                    } else if (newRole === 'gestor_coae') {
-                      setSelectedCampus('mossoro');
-                      onNavigate('dashboard');
-                    } else {
-                      onNavigate('dashboard');
-                    }
-                  }}
-                  className="appearance-none bg-ufersa-green-500 hover:bg-ufersa-green-400 text-slate-950 text-xs font-bold py-1.5 pl-3 pr-7 rounded-lg cursor-pointer transition shadow-xs"
-                  title="Alternar perfil de visualização"
+              {/* Botão de Logout */}
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="p-1.5 text-ufersa-blue-300 hover:text-white hover:bg-rose-500/20 rounded-lg transition cursor-pointer"
+                  title="Sair do sistema (Logout)"
                 >
-                  <option value="gestor_proae">Gestor PROAE (Central)</option>
-                  <option value="gestor_coae">Gestor COAE (Campus Local)</option>
-                  <option value="morador">Morador (Discente)</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-900 absolute right-2 top-2.5 pointer-events-none" />
-              </div>
+                  <LogOut className="w-4 h-4 text-rose-400" />
+                </button>
+              )}
             </div>
 
           </div>

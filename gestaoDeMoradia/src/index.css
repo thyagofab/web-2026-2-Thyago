@@ -21,15 +21,16 @@
   --color-ufersa-blue-900: #122552;
   --color-ufersa-blue-950: #0b1730;
 
-  --color-ufersa-green-50: #f4faec;
-  --color-ufersa-green-100: #e6f3d3;
-  --color-ufersa-green-200: #cfe7a9;
-  --color-ufersa-green-300: #b4d87a;
-  --color-ufersa-green-400: #9fcb58;
-  --color-ufersa-green-500: #94c348;
-  --color-ufersa-green-600: #7baa37;
-  --color-ufersa-green-700: #628a2c;
-  --color-ufersa-green-800: #4e6f25;
-  --color-ufersa-green-900: #3e5920;
-  --color-ufersa-green-950: #23330f;
+  /* Alias legados mantidos para os componentes existentes, agora alinhados ao azul do login. */
+  --color-ufersa-green-50: #eff6ff;
+  --color-ufersa-green-100: #dbeafe;
+  --color-ufersa-green-200: #bfdbfe;
+  --color-ufersa-green-300: #93c5fd;
+  --color-ufersa-green-400: #60a5fa;
+  --color-ufersa-green-500: #3b82f6;
+  --color-ufersa-green-600: #2563eb;
+  --color-ufersa-green-700: #1d4ed8;
+  --color-ufersa-green-800: #1e40af;
+  --color-ufersa-green-900: #1e3a8a;
+  --color-ufersa-green-950: #172554;
 }

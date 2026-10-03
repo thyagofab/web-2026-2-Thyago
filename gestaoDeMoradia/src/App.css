@@ -1,7 +1,7 @@
 /* App-level custom styling and resets */
 @layer base {
   body {
-    background-color: #f8fafc;
+    background-color: #f5f9ff;
     color: #0f172a;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }

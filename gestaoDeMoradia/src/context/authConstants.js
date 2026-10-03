@@ -1,0 +1,35 @@
+// Contas para teste rápido de demonstração (permite testar as regras de negócio de cada perfil)
+export const DEMO_ACCOUNTS = [
+  {
+    role: 'gestor_proae',
+    roleLabel: 'Gestor PROAE (Central)',
+    email: 'proae.central@ufersa.edu.br',
+    password: 'ProaePassword123!',
+    nome: 'Coordenação Central PROAE',
+    campus: 'todos',
+    campusNome: 'Todos os Campi (PROAE Central)',
+    descricao: 'Acesso irrestrito a todos os campi, auditoria, campanhas e cadastro de novos membros.',
+  },
+  {
+    role: 'gestor_coae',
+    roleLabel: 'Gestor COAE (Campus Mossoró)',
+    email: 'coae.mossoro@ufersa.edu.br',
+    password: 'CoaePassword123!',
+    nome: 'Servidor COAE - Mossoró',
+    campus: 'mossoro',
+    campusNome: 'Campus Mossoró (Sede)',
+    descricao: 'Acesso restrito ao Campus Mossoró. Não cadastra novos membros nem gerencia outros campi.',
+  },
+  {
+    role: 'morador',
+    roleLabel: 'Morador Residente (Discente)',
+    email: 'thyago.fernandes@alunos.ufersa.edu.br',
+    password: 'MoradorPassword123!',
+    nome: 'Thyago Fernandes da Silva',
+    campus: 'mossoro',
+    campusNome: 'Campus Mossoró',
+    matricula: '2022014589',
+    curso: 'Ciência da Computação',
+    descricao: 'Acesso restrito ao Portal do Morador: assinatura de termo, demandas e recadastramento.',
+  },
+];

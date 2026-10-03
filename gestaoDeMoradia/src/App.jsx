@@ -15,6 +15,9 @@ import AllocateBedModal from './components/AllocateBedModal';
 import DesligamentoModal from './components/DesligamentoModal';
 import NewDemandModal from './components/NewDemandModal';
 import NewRoomModal from './components/NewRoomModal';
+import CadastrarMembroModal from './components/CadastrarMembroModal';
+import LoginView from './components/LoginView';
+import { useAuth } from './context/useAuth';
 
 import {
   CAMPI,
@@ -43,27 +46,70 @@ const ROLE_PERMISSIONS = {
   morador: ['student_portal', 'demands', 'recadastramento', 'academic'],
 };
 
-const PATH_TABS = Object.fromEntries(
-  Object.entries(TAB_PATHS).flatMap(([tab, path]) => [
-    [path, tab],
-    [`/gestao${path}`, tab],
-  ])
-);
+const PATH_TABS = {
+  ...Object.fromEntries(
+    Object.entries(TAB_PATHS).flatMap(([tab, path]) => [
+      [path, tab],
+      [`/gestao${path}`, tab],
+    ])
+  ),
+  '/demanda': 'demands',
+  '/gestao/demanda': 'demands',
+};
 
 function getTabFromPath(pathname) {
   return PATH_TABS[pathname] || 'dashboard';
 }
 
 export default function App() {
+  const { currentUser, isAuthenticated, logout } = useAuth();
+
   // Estado do Perfil e Campus ativo
-  const [currentRole, setCurrentRole] = useState('gestor_proae'); // 'gestor_proae', 'gestor_coae', 'morador'
-  const [selectedCampus, setSelectedCampus] = useState('todos');
+  const currentRole = currentUser?.role || null;
+  const [selectedCampus, setSelectedCampus] = useState(() => currentUser?.campus || 'todos');
   const [activeTab, setActiveTab] = useState(() => getTabFromPath(window.location.pathname));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cadastrarMembroModalOpen, setCadastrarMembroModalOpen] = useState(false);
+
+  const navigateToTab = (tab, role = currentRole) => {
+    const path = TAB_PATHS[tab];
+    if (!path) return;
+    if (!role || !ROLE_PERMISSIONS[role]?.includes(tab)) {
+      window.alert('Seu perfil não possui permissão para acessar esta página.');
+      return;
+    }
+
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, '', path);
+    }
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+  };
+
+  const handleLoginSuccess = (user) => {
+    if (user.role === 'morador') {
+      setSelectedCampus(user.campus || 'mossoro');
+      navigateToTab('student_portal', user.role);
+    } else if (user.role === 'gestor_coae') {
+      setSelectedCampus(user.campus || 'mossoro');
+      navigateToTab('dashboard', user.role);
+    } else {
+      setSelectedCampus('todos');
+      navigateToTab('dashboard', user.role);
+    }
+  };
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      if (window.location.pathname !== '/login') {
+        window.history.replaceState(null, '', '/login');
+      }
+      return;
+    }
+
     const initialTab = getTabFromPath(window.location.pathname);
-    const allowedTabs = ROLE_PERMISSIONS[currentRole];
+    const allowedTabs = ROLE_PERMISSIONS[currentRole] || [];
+    if (allowedTabs.length === 0) return;
     const safeTab = allowedTabs.includes(initialTab) ? initialTab : allowedTabs[0];
     if (window.location.pathname !== TAB_PATHS[safeTab]) {
       window.history.replaceState(null, '', TAB_PATHS[safeTab]);
@@ -80,22 +126,7 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [currentRole]);
-
-  const navigateToTab = (tab) => {
-    const path = TAB_PATHS[tab];
-    if (!path) return;
-    if (!ROLE_PERMISSIONS[currentRole].includes(tab)) {
-      window.alert('Seu perfil não possui permissão para acessar esta página.');
-      return;
-    }
-
-    if (window.location.pathname !== path) {
-      window.history.pushState(null, '', path);
-    }
-    setActiveTab(tab);
-    setMobileMenuOpen(false);
-  };
+  }, [currentRole, isAuthenticated]);
 
   // Estados dos Dados Centrais
   const [rooms, setRooms] = useState(INITIAL_ROOMS);
@@ -120,7 +151,13 @@ export default function App() {
   const [newRoomModalOpen, setNewRoomModalOpen] = useState(false);
 
   // Usuário padrão logado quando em visão do Morador
-  const currentStudentUser = residents.find((r) => r.id === 'morador-1') || residents[0];
+  const currentStudentUser =
+    residents.find(
+      (resident) =>
+        resident.email?.toLowerCase() === currentUser?.email?.toLowerCase()
+    ) ||
+    residents.find((resident) => resident.id === 'morador-1') ||
+    residents[0];
 
   // Contadores para alertas do Navbar
   const imminentVacanciesCount = residents.filter((r) => r.desocupacaoIminente).length;
@@ -354,6 +391,33 @@ export default function App() {
     setLogs((prev) => [newLog, ...prev]);
   };
 
+  // Handler: Cadastrar Novo Membro (Exclusivo PROAE)
+  const handleMemberCreated = (newMember) => {
+    if (newMember.role === 'morador') {
+      const newSuplente = {
+        matricula: newMember.matricula || `2026${Date.now().toString().slice(-6)}`,
+        nome: newMember.nome,
+        curso: newMember.curso || 'Curso de Graduação',
+        classificacaoEdital: suplentes.length + 1,
+        pontuacao: 85.0,
+        email: newMember.email,
+        campusId: newMember.campus,
+        campusNome: newMember.campusNome,
+      };
+      setSuplentes((prev) => [newSuplente, ...prev]);
+    }
+
+    const newLog = {
+      id: `LOG-${Date.now().toString().slice(-4)}`,
+      timestamp: new Date().toLocaleString('pt-BR'),
+      usuario: `${currentUser?.nome || 'Gestão PROAE'} (PROAE Central)`,
+      tipoAcao: 'Cadastro de Novo Membro',
+      detalhes: `Novo usuário ${newMember.nome} (${newMember.role.toUpperCase()}) cadastrado no sistema para o ${newMember.campusNome}.`,
+      campus: newMember.campusNome,
+    };
+    setLogs((prev) => [newLog, ...prev]);
+  };
+
   // Modais Openers
   const handleOpenAllocate = (cama, room) => {
     setTargetBedForAllocate(cama);
@@ -371,23 +435,17 @@ export default function App() {
     setDesligamentoModalOpen(true);
   };
 
+  // Se não estiver autenticado, exibe a tela de login
+  if (!isAuthenticated) {
+    return <LoginView onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
       
       {/* Top Navbar */}
       <Navbar
         currentRole={currentRole}
-        setCurrentRole={(role) => {
-          setCurrentRole(role);
-          if (role === 'morador') {
-            navigateToTab('student_portal');
-          } else if (role === 'gestor_coae') {
-            setSelectedCampus('mossoro');
-            if (activeTab === 'student_portal') navigateToTab('dashboard');
-          } else if (activeTab === 'student_portal') {
-            navigateToTab('dashboard');
-          }
-        }}
         selectedCampus={selectedCampus}
         setSelectedCampus={setSelectedCampus}
         campi={CAMPI}
@@ -397,6 +455,9 @@ export default function App() {
         onNavigate={navigateToTab}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
+        currentUser={currentUser}
+        onLogout={logout}
+        onOpenCadastrarMembro={() => setCadastrarMembroModalOpen(true)}
       />
 
       {/* Main Body */}
@@ -536,6 +597,13 @@ export default function App() {
         onClose={() => setNewRoomModalOpen(false)}
         campi={CAMPI}
         onConfirmCreateRoom={handleConfirmCreateRoom}
+      />
+
+      <CadastrarMembroModal
+        isOpen={cadastrarMembroModalOpen}
+        onClose={() => setCadastrarMembroModalOpen(false)}
+        onMemberCreated={handleMemberCreated}
+        currentUserRole={currentRole}
       />
 
     </div>
