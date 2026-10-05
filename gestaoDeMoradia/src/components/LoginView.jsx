@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   AlertCircle,
   ArrowRight,
@@ -13,6 +13,49 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { DEMO_ACCOUNTS } from '../context/authConstants';
+import { GOOGLE_CLIENT_ID, loadGoogleScript } from '../services/googleAuth';
+
+function GoogleLoginButton({ onCredential }) {
+  const buttonRef = useRef(null);
+  const callbackRef = useRef(onCredential);
+
+  useEffect(() => {
+    callbackRef.current = onCredential;
+  }, [onCredential]);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    let cancelled = false;
+    loadGoogleScript().then((google) => {
+      if (cancelled || !buttonRef.current) return;
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response) => callbackRef.current(response.credential),
+        ux_mode: 'popup',
+      });
+      google.accounts.id.renderButton(buttonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        width: 360,
+        locale: 'pt-BR',
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!GOOGLE_CLIENT_ID) {
+    return (
+      <p className="text-center text-xs text-amber-600">
+        Configure VITE_GOOGLE_CLIENT_ID no .env para habilitar o login com Google.
+      </p>
+    );
+  }
+  return <div ref={buttonRef} className="flex justify-center" />;
+}
 
 function DemoAccess({ username, onSelect }) {
   return (
@@ -46,7 +89,12 @@ function DemoAccess({ username, onSelect }) {
 }
 
 export default function LoginView({ onLoginSuccess }) {
-  const { login, loading, authError, challenge, completeNewPassword } = useAuth();
+  const { login, loginWithGoogle, loading, authError, challenge, completeNewPassword } = useAuth();
+
+  const handleGoogleCredential = (credential) => {
+    const result = loginWithGoogle(credential);
+    if (result.success) onLoginSuccess?.(result.user);
+  };
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -207,6 +255,12 @@ export default function LoginView({ onLoginSuccess }) {
                 {feedback && <FeedbackMessage message={feedback} />}
                 <SubmitButton loading={loading} label="Entrar na plataforma" />
               </form>
+              <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
+                <span className="h-px flex-1 bg-slate-200" />
+                ou
+                <span className="h-px flex-1 bg-slate-200" />
+              </div>
+              <GoogleLoginButton onCredential={handleGoogleCredential} />
               <DemoAccess username={username} onSelect={selectDemo} />
             </>
           )}

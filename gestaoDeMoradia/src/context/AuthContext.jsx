@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AuthContext } from './authContextInstance';
 import { authenticateWithCognito, respondToNewPasswordChallenge } from '../services/cognitoAuth';
 import { DEMO_ACCOUNTS } from './authConstants';
+import { decodeGoogleCredential } from '../services/googleAuth';
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -169,9 +170,49 @@ export function AuthProvider({ children }) {
   };
 
   /**
+   * Login com Google (recebe o ID Token JWT "credential" do Google Identity Services)
+   */
+  const loginWithGoogle = (credential) => {
+    setAuthError(null);
+    try {
+      const payload = decodeGoogleCredential(credential);
+      // Exibe o JWT no console para inspeção (DevTools > Console)
+      console.group('%c[Google OAuth] ID Token JWT recebido', 'color:#1a73e8;font-weight:bold');
+      console.log('JWT (credential):', credential);
+      console.log('Payload decodificado:', payload);
+      console.groupEnd();
+
+      const demo = DEMO_ACCOUNTS.find((acc) => acc.email.toLowerCase() === payload.email.toLowerCase());
+      const isAluno = payload.email.toLowerCase().endsWith('@alunos.ufersa.edu.br');
+      const role = demo?.role || (isAluno ? 'morador' : 'gestor_coae');
+      const userObj = {
+        id: payload.sub,
+        email: payload.email,
+        nome: payload.name || payload.email,
+        foto: payload.picture || null,
+        role,
+        roleLabel: demo?.roleLabel || (isAluno ? 'Morador (Discente)' : 'Gestor COAE (Campus Local)'),
+        campus: demo?.campus || 'mossoro',
+        campusNome: demo?.campusNome || 'Campus Mossoró',
+        matricula: demo?.matricula || null,
+        curso: demo?.curso || null,
+        provider: 'google',
+        isDemo: false,
+      };
+      setCurrentUser(userObj);
+      setAuthTokens({ provider: 'google', idToken: credential });
+      return { success: true, user: userObj };
+    } catch (err) {
+      setAuthError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  /**
    * Logout
    */
   const logout = () => {
+    window.google?.accounts?.id?.disableAutoSelect();
     setCurrentUser(null);
     setAuthTokens(null);
     setChallenge(null);
@@ -191,6 +232,7 @@ export function AuthProvider({ children }) {
         authError,
         challenge,
         login,
+        loginWithGoogle,
         logout,
         completeNewPassword,
       }}
