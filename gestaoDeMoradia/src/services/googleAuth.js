@@ -2,7 +2,11 @@
 // Docs: https://developers.google.com/identity/gsi/web
 import { parseJwt } from './cognitoAuth';
 
-export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+// O Client ID é público (vai para o navegador de qualquer forma); o fallback garante
+// funcionamento mesmo se a variável não estiver configurada no build do Amplify.
+export const GOOGLE_CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ||
+  '151802191366-l48msnqra6a4g3vqrjtmmuhuqgm29del.apps.googleusercontent.com';
 
 // Domínios institucionais aceitos no login com Google
 export const ALLOWED_DOMAINS = ['ufersa.edu.br', 'alunos.ufersa.edu.br'];
