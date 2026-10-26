@@ -39,12 +39,13 @@ const TAB_PATHS = {
   demands: '/demandas',
   student_portal: '/portal-morador',
   audit_logs: '/auditoria',
+  chat: '/assistente',
 };
 
 const ROLE_PERMISSIONS = {
   gestor_proae: Object.keys(TAB_PATHS),
-  gestor_coae: ['dashboard', 'infrastructure', 'allocations', 'academic', 'demands'],
-  morador: ['student_portal', 'demands', 'recadastramento', 'academic'],
+  gestor_coae: ['dashboard', 'infrastructure', 'allocations', 'academic', 'demands', 'chat'],
+  morador: ['student_portal', 'demands', 'recadastramento', 'academic', 'chat'],
 };
 
 const PATH_TABS = {
