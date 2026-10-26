@@ -21,6 +21,11 @@ export default function ChatView() {
       onClose: () => setStatus('closed'),
       onError: () => setStatus('closed'),
       onMessage: (data) => {
+        // "typing": Lambda avisando que está consultando o Gemini.
+        if (data?.type === 'typing') return setWaiting(true);
+        // Resposta síncrona do API Gateway (limite de 29s da integração).
+        // A resposta real ainda chega depois via PostToConnection.
+        if (!data?.type && /timed out/i.test(data?.message || '')) return;
         setWaiting(false);
         setMessages((prev) => [
           ...prev,
