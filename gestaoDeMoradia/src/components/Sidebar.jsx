@@ -8,6 +8,7 @@ import {
   User,
   ShieldCheck,
   Clock,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -120,11 +121,23 @@ export default function Sidebar({
     },
   ];
 
-  const itemsToRender = isStudent
-    ? studentNavItems
-    : currentRole === 'gestor_coae'
-    ? managerNavItems.filter((item) => !['audit_logs', 'student_portal'].includes(item.id))
-    : managerNavItems;
+  const chatItem = {
+    id: 'chat',
+    label: 'Assistente Virtual',
+    sublabel: 'Chat com IA (Gemini)',
+    icon: MessageCircle,
+    badge: 'IA',
+    badgeColor: 'bg-violet-100 text-violet-800 border-violet-300',
+  };
+
+  const itemsToRender = [
+    ...(isStudent
+      ? studentNavItems
+      : currentRole === 'gestor_coae'
+      ? managerNavItems.filter((item) => !['audit_logs', 'student_portal'].includes(item.id))
+      : managerNavItems),
+    chatItem,
+  ];
 
   const handleSelect = (id) => {
     setActiveTab(id);

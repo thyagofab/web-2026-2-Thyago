@@ -9,6 +9,7 @@ import DemandsView from './components/DemandsView';
 import RecadastramentoView from './components/RecadastramentoView';
 import StudentPortalView from './components/StudentPortalView';
 import AuditLogsView from './components/AuditLogsView';
+import ChatView from './components/ChatView';
 
 import TermoCompromissoModal from './components/TermoCompromissoModal';
 import AllocateBedModal from './components/AllocateBedModal';
@@ -549,6 +550,8 @@ export default function App() {
               onOpenNewDemand={() => setNewDemandModalOpen(true)}
             />
           )}
+
+          {activeTab === 'chat' && <ChatView />}
 
           {activeTab === 'audit_logs' && (
             <AuditLogsView logs={logs} />
