@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Building2, Bell, AlertTriangle, CheckCircle2, Menu, X, MapPin, UserPlus, LogOut } from 'lucide-react';
+import { Building2, Bell, AlertTriangle, CheckCircle2, Menu, X, MapPin, UserPlus, LogOut, UserCircle } from 'lucide-react';
 
 export default function Navbar({
   currentRole,
@@ -15,6 +15,7 @@ export default function Navbar({
   currentUser,
   onLogout,
   onOpenCadastrarMembro,
+  onOpenProfile,
 }) {
   const totalNotifications = imminentVacanciesCount + academicAlertsCount + pendingDemandsCount;
   const [notifOpen, setNotifOpen] = useState(false);
@@ -199,20 +200,30 @@ export default function Navbar({
 
             {/* Profile / Role Selector */}
             <div className="flex items-center gap-2 bg-ufersa-blue-950/70 p-1.5 rounded-xl border border-ufersa-blue-700/60">
-              <div className="hidden sm:flex flex-col text-right pl-2">
-                <span className="text-xs font-bold text-white leading-tight truncate max-w-[140px]">
-                  {currentUser?.nome || (
-                    currentRole === 'gestor_proae'
-                      ? 'Coordenação Central'
-                      : currentRole === 'gestor_coae'
-                      ? 'Equipe Mossoró'
-                      : 'Thyago Fernandes'
-                  )}
-                </span>
-                <span className="text-[11px] text-ufersa-blue-300 leading-tight">
-                  {currentRole === 'gestor_proae' ? 'Gestão PROAE' : currentRole === 'gestor_coae' ? 'Gestão COAE' : 'Morador Residente'}
-                </span>
-              </div>
+              <button
+                type="button"
+                onClick={onOpenProfile}
+                className="flex items-center gap-2 text-left hover:bg-ufersa-blue-800/60 p-1 rounded-lg transition cursor-pointer"
+                title="Configurar Foto de Perfil (S3 / API Gateway)"
+              >
+                <div className="w-8 h-8 rounded-full bg-ufersa-blue-800 border border-ufersa-blue-600 flex items-center justify-center text-ufersa-green-400 shrink-0">
+                  <UserCircle className="w-5 h-5" />
+                </div>
+                <div className="hidden sm:flex flex-col text-right pl-1">
+                  <span className="text-xs font-bold text-white leading-tight truncate max-w-[130px]">
+                    {currentUser?.nome || (
+                      currentRole === 'gestor_proae'
+                        ? 'Coordenação Central'
+                        : currentRole === 'gestor_coae'
+                        ? 'Equipe Mossoró'
+                        : 'Thyago Fernandes'
+                    )}
+                  </span>
+                  <span className="text-[11px] text-ufersa-blue-300 leading-tight">
+                    {currentRole === 'gestor_proae' ? 'Gestão PROAE' : currentRole === 'gestor_coae' ? 'Gestão COAE' : 'Morador Residente'}
+                  </span>
+                </div>
+              </button>
 
               {/* Botão de Logout */}
               {onLogout && (

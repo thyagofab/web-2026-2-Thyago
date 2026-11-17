@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Stack SAM para Gestao de Moradia - Upload e Consulta de Perfil com S3, API Gateway e Cognito JWT
+
+Parameters:
+  CognitoUserPoolId:
+    Type: String
+    Default: us-east-1_02yJNx6xh
+    Description: ID do User Pool do Cognito
+
+Globals:
+  Function:
+    Timeout: 20
+    MemorySize: 256
+    Runtime: nodejs20.x
+
+Resources:
+  # 1. Bucket S3 para armazenar as fotos de perfil
+  ProfileBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "profile-gestaomoradia-${AWS::AccountId}"
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - HEAD
+            AllowedOrigins:
+              - '*'
+            MaxAge: 3600
+
+  # 2. API Gateway REST com Autorizador Cognito e CORS
+  ProfileApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}"
+            Identity:
+              Header: Authorization
+
+  # 3. Funcao Lambda para processar e ler a imagem
+  ProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/profile/
+      Handler: index.handler
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/LabRole"
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref ProfileBucket
+      Events:
+        PostProfile:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ProfileApi
+            Path: /profile
+            Method: post
+            Auth:
+              Authorizer: CognitoAuthorizer
+        GetProfile:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ProfileApi
+            Path: /profile
+            Method: get
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+Outputs:
+  ApiEndpoint:
+    Description: URL Base do API Gateway para colocar no .env (VITE_API_GATEWAY_URL)
+    Value: !Sub "https://${ProfileApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  BucketName:
+    Description: Nome do Bucket S3 criado
+    Value: !Ref ProfileBucket

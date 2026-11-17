@@ -25,3 +25,7 @@ dist-ssr
 
 # Variaveis de ambiente
 .env
+
+# AWS SAM
+.aws-sam/
+samconfig.toml

@@ -17,6 +17,7 @@ import DesligamentoModal from './components/DesligamentoModal';
 import NewDemandModal from './components/NewDemandModal';
 import NewRoomModal from './components/NewRoomModal';
 import CadastrarMembroModal from './components/CadastrarMembroModal';
+import ProfileModal from './components/ProfileModal';
 import LoginView from './components/LoginView';
 import { useAuth } from './context/useAuth';
 
@@ -72,6 +73,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => getTabFromPath(window.location.pathname));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cadastrarMembroModalOpen, setCadastrarMembroModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   const navigateToTab = (tab, role = currentRole) => {
     const path = TAB_PATHS[tab];
@@ -460,6 +462,7 @@ export default function App() {
         currentUser={currentUser}
         onLogout={logout}
         onOpenCadastrarMembro={() => setCadastrarMembroModalOpen(true)}
+        onOpenProfile={() => setProfileModalOpen(true)}
       />
 
       {/* Main Body */}
@@ -608,6 +611,11 @@ export default function App() {
         onClose={() => setCadastrarMembroModalOpen(false)}
         onMemberCreated={handleMemberCreated}
         currentUserRole={currentRole}
+      />
+
+      <ProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
       />
 
     </div>
