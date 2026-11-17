@@ -27,18 +27,45 @@ const CORS_HEADERS = {
 };
 
 /**
- * Helper para extrair o ID único do usuário autenticado pelo Cognito JWT
+ * Helper universal para obter o ID / e-mail do usuário autenticado (Cognito ou Google JWT)
  */
-function getUserId(event) {
+function getUserInfo(event, body = {}) {
+  // 1. Claims do autorizador se presente
   const claims = event.requestContext?.authorizer?.claims;
   if (claims) {
-    return claims.sub || claims["cognito:username"] || claims.email;
+    return {
+      userId: claims.email || claims.sub || claims["cognito:username"],
+      email: claims.email,
+      nome: claims.name,
+    };
   }
-  return (
-    event.queryStringParameters?.userId ||
-    event.headers?.["x-user-id"] ||
-    "thyago-default-user"
-  );
+
+  // 2. Decodifica token JWT presente no header Authorization (Google ou Cognito)
+  const authHeader = event.headers?.Authorization || event.headers?.authorization;
+  if (authHeader) {
+    try {
+      const rawToken = authHeader.replace(/^Bearer\s+/i, "").trim();
+      const parts = rawToken.split(".");
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
+        return {
+          userId: payload.email || payload.sub || "thyago-usuario",
+          email: payload.email || `${payload.sub}@alunos.ufersa.edu.br`,
+          nome: payload.name || payload.given_name || "Thyago Fabricio",
+        };
+      }
+    } catch (e) {
+      console.warn("Aviso ao decodificar JWT do header Authorization:", e.message);
+    }
+  }
+
+  // 3. Fallback para os dados passados no body ou query
+  const userId = body.email || body.userId || event.queryStringParameters?.userId || "thyago-usuario";
+  return {
+    userId,
+    email: body.email || `${userId}@alunos.ufersa.edu.br`,
+    nome: body.nome || "Thyago Fabricio",
+  };
 }
 
 export const handler = async (event) => {
@@ -55,23 +82,23 @@ export const handler = async (event) => {
     };
   }
 
-  const userId = getUserId(event);
+  let body = {};
+  if (event.body) {
+    try {
+      body = JSON.parse(event.body);
+    } catch {
+      body = {};
+    }
+  }
+
+  const userInfo = getUserInfo(event, body);
+  const userId = userInfo.userId;
 
   try {
     // -----------------------------------------------------------------
-    // OPERAÇÃO PUT /profile: Atualiza informações cadastrais no DynamoDB
-    // e salva/atualiza a foto de perfil no Bucket S3
+    // OPERAÇÃO PUT /profile: Atualiza no DynamoDB e no Bucket S3
     // -----------------------------------------------------------------
     if (method === "PUT" || method === "POST") {
-      let body = {};
-      if (event.body) {
-        try {
-          body = JSON.parse(event.body);
-        } catch {
-          body = {};
-        }
-      }
-
       let imageUrl = body.profileImageUrl || null;
 
       // 1. Processar a imagem e salvar no S3 (caso enviada no payload)
@@ -85,7 +112,9 @@ export const handler = async (event) => {
         else if (contentType.includes("webp")) ext = "webp";
         else if (contentType.includes("gif")) ext = "gif";
 
-        const key = `profiles/${userId}.${ext}`;
+        // Nome do arquivo limpo no S3
+        const safeUserId = userId.replace(/[^a-zA-Z0-9_-]/g, "_");
+        const key = `profiles/${safeUserId}.${ext}`;
 
         await s3Client.send(
           new PutObjectCommand({
@@ -94,26 +123,26 @@ export const handler = async (event) => {
             Body: imageBuffer,
             ContentType: contentType,
             Metadata: {
-              uploadedBy: userId,
+              uploadedBy: safeUserId,
               updatedAt: new Date().toISOString(),
             },
           })
         );
 
-        // Gerar URL pré-assinada para exibição
+        // Gerar URL pré-assinada válida por 7 dias
         const getCmd = new GetObjectCommand({
           Bucket: BUCKET_NAME,
           Key: key,
         });
-        imageUrl = await getSignedUrl(s3Client, getCmd, { expiresIn: 604800 }); // 7 dias
+        imageUrl = await getSignedUrl(s3Client, getCmd, { expiresIn: 604800 });
       }
 
       // 2. Salvar / Atualizar os dados cadastrais do usuário no DynamoDB
       const now = new Date().toISOString();
       const userItem = {
         userId,
-        email: body.email || event.requestContext?.authorizer?.claims?.email || userId,
-        nome: body.nome || "Thyago Fabricio",
+        email: body.email || userInfo.email,
+        nome: body.nome || userInfo.nome,
         campus: body.campus || "mossoro",
         matricula: body.matricula || "2026.2-RU",
         curso: body.curso || "Engenharia de Software",
@@ -130,7 +159,7 @@ export const handler = async (event) => {
         })
       );
 
-      console.log(`Usuário ${userId} salvo com sucesso no DynamoDB (${TABLE_NAME}) e S3 (${BUCKET_NAME})`);
+      console.log(`Usuário ${userId} salvo no DynamoDB (${TABLE_NAME}) e S3 (${BUCKET_NAME})`);
 
       return {
         statusCode: 200,
@@ -157,12 +186,11 @@ export const handler = async (event) => {
 
       let user = getRes.Item;
 
-      // Se não encontrar no DynamoDB, gera um registro inicial com os claims do JWT
       if (!user) {
         user = {
           userId,
-          email: event.requestContext?.authorizer?.claims?.email || `${userId}@alunos.ufersa.edu.br`,
-          nome: event.requestContext?.authorizer?.claims?.name || "Thyago Fabricio",
+          email: userInfo.email,
+          nome: userInfo.nome,
           campus: "mossoro",
           matricula: "2026.2-RU",
           curso: "Engenharia de Software",
@@ -173,10 +201,11 @@ export const handler = async (event) => {
         };
       }
 
-      // Se já houver imagem no S3, tenta gerar uma URL assinada atualizada
+      // Se houver imagem no S3, atualiza a URL assinada
+      const safeUserId = userId.replace(/[^a-zA-Z0-9_-]/g, "_");
       const possibleExtensions = ["jpg", "png", "webp", "jpeg"];
       for (const ext of possibleExtensions) {
-        const key = `profiles/${userId}.${ext}`;
+        const key = `profiles/${safeUserId}.${ext}`;
         try {
           const getCmd = new GetObjectCommand({
             Bucket: BUCKET_NAME,

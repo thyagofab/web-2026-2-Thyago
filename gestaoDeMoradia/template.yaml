@@ -1,12 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Stack SAM para Gestao de Moradia - Upload e Consulta de Perfil com S3, DynamoDB, API Gateway e Cognito JWT
+Description: Stack SAM para Gestao de Moradia - Upload e Consulta de Perfil com S3, DynamoDB, API Gateway e Auth Federada/Cognito
 
 Parameters:
-  CognitoUserPoolId:
-    Type: String
-    Default: us-east-1_02yJNx6xh
-    Description: ID do User Pool do Cognito
   BucketName:
     Type: String
     Default: thyago-profile-2026.2
@@ -23,21 +19,15 @@ Globals:
     Runtime: nodejs20.x
 
 Resources:
-  # 1. API Gateway REST com Autorizador Cognito e CORS
+  # 1. API Gateway REST com CORS
   ProfileApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
       Cors:
         AllowMethods: "'GET,POST,PUT,OPTIONS'"
-        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowHeaders: "'*'"
         AllowOrigin: "'*'"
-      Auth:
-        Authorizers:
-          CognitoAuthorizer:
-            UserPoolArn: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}"
-            Identity:
-              Header: Authorization
 
   # 2. Funcao Lambda para processar o perfil e imagem
   ProfileFunction:
@@ -57,24 +47,18 @@ Resources:
             RestApiId: !Ref ProfileApi
             Path: /profile
             Method: put
-            Auth:
-              Authorizer: CognitoAuthorizer
         PostProfile:
           Type: Api
           Properties:
             RestApiId: !Ref ProfileApi
             Path: /profile
             Method: post
-            Auth:
-              Authorizer: CognitoAuthorizer
         GetProfile:
           Type: Api
           Properties:
             RestApiId: !Ref ProfileApi
             Path: /profile
             Method: get
-            Auth:
-              Authorizer: CognitoAuthorizer
 
 Outputs:
   ApiEndpoint:
