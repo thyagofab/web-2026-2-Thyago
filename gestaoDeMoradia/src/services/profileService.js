@@ -6,7 +6,7 @@
 const API_BASE_URL =
   import.meta.env?.VITE_API_GATEWAY_URL ||
   import.meta.env?.VITE_PROFILE_API_URL ||
-  '';
+  'https://b8vjk5qdkj.execute-api.us-east-1.amazonaws.com/prod';
 
 /**
  * Converte um arquivo do tipo File em string Base64
