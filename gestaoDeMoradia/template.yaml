@@ -1,12 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Stack SAM para Gestao de Moradia - Upload e Consulta de Perfil com S3, API Gateway e Cognito JWT
+Description: Stack SAM para Gestao de Moradia - Upload e Consulta de Perfil com S3, DynamoDB, API Gateway e Cognito JWT
 
 Parameters:
   CognitoUserPoolId:
     Type: String
     Default: us-east-1_02yJNx6xh
     Description: ID do User Pool do Cognito
+  BucketName:
+    Type: String
+    Default: thyago-profile-2026.2
+    Description: Nome do Bucket S3
+  TableName:
+    Type: String
+    Default: Thyago-message-2026.2
+    Description: Nome da Tabela DynamoDB
 
 Globals:
   Function:
@@ -15,31 +23,13 @@ Globals:
     Runtime: nodejs20.x
 
 Resources:
-  # 1. Bucket S3 para armazenar as fotos de perfil
-  ProfileBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "profile-gestaomoradia-${AWS::AccountId}"
-      CorsConfiguration:
-        CorsRules:
-          - AllowedHeaders:
-              - '*'
-            AllowedMethods:
-              - GET
-              - PUT
-              - POST
-              - HEAD
-            AllowedOrigins:
-              - '*'
-            MaxAge: 3600
-
-  # 2. API Gateway REST com Autorizador Cognito e CORS
+  # 1. API Gateway REST com Autorizador Cognito e CORS
   ProfileApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
       Cors:
-        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowMethods: "'GET,POST,PUT,OPTIONS'"
         AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
       Auth:
@@ -49,7 +39,7 @@ Resources:
             Identity:
               Header: Authorization
 
-  # 3. Funcao Lambda para processar e ler a imagem
+  # 2. Funcao Lambda para processar o perfil e imagem
   ProfileFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -58,8 +48,17 @@ Resources:
       Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/LabRole"
       Environment:
         Variables:
-          BUCKET_NAME: !Ref ProfileBucket
+          BUCKET_NAME: !Ref BucketName
+          TABLE_NAME: !Ref TableName
       Events:
+        PutProfile:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ProfileApi
+            Path: /profile
+            Method: put
+            Auth:
+              Authorizer: CognitoAuthorizer
         PostProfile:
           Type: Api
           Properties:
@@ -82,5 +81,8 @@ Outputs:
     Description: URL Base do API Gateway para colocar no .env (VITE_API_GATEWAY_URL)
     Value: !Sub "https://${ProfileApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
   BucketName:
-    Description: Nome do Bucket S3 criado
-    Value: !Ref ProfileBucket
+    Description: Nome do Bucket S3
+    Value: !Ref BucketName
+  TableName:
+    Description: Nome da Tabela DynamoDB
+    Value: !Ref TableName

@@ -1,18 +1,46 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Upload, Image as ImageIcon, CheckCircle2, AlertCircle, RefreshCw, Key, ShieldCheck } from 'lucide-react';
-import { uploadProfileImage, getProfileImage } from '../services/profileService';
+import {
+  X,
+  Upload,
+  Image as ImageIcon,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  Key,
+  ShieldCheck,
+  Database,
+  HardDrive,
+  User,
+  School,
+  IdCard,
+  BookOpen,
+  MapPin,
+} from 'lucide-react';
+import { updateProfile, getProfileImage } from '../services/profileService';
 import { useAuth } from '../context/useAuth';
 
 export default function ProfileModal({ isOpen, onClose }) {
-  const { currentUser, authTokens } = useAuth();
+  const { currentUser, authTokens, setCurrentUser } = useAuth();
   const token = authTokens?.idToken || authTokens?.accessToken || '';
+
+  // Estados dos dados cadastrais
+  const [formData, setFormData] = useState({
+    nome: currentUser?.nome || 'Thyago Fabricio',
+    email: currentUser?.email || 'thyago.costa@alunos.ufersa.edu.br',
+    campus: currentUser?.campus || 'mossoro',
+    matricula: currentUser?.matricula || '2026.2-RU',
+    curso: currentUser?.curso || 'Engenharia de Software',
+    role: currentUser?.role || 'morador',
+    bio: currentUser?.bio || 'Discente residente na Moradia Universitária da UFERSA',
+  });
 
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [fetchingImage, setFetchingImage] = useState(false);
+  const [fetchingData, setFetchingData] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
+  const [dynamoItem, setDynamoItem] = useState(null);
   const [customApiUrl, setCustomApiUrl] = useState(
     import.meta.env?.VITE_API_GATEWAY_URL || 'https://b8vjk5qdkj.execute-api.us-east-1.amazonaws.com/prod'
   );
@@ -20,31 +48,46 @@ export default function ProfileModal({ isOpen, onClose }) {
 
   const fileInputRef = useRef(null);
 
-  // Busca a imagem atual no S3 via GET /profile ao abrir o modal
+  // Busca dados cadastrais do DynamoDB e foto do S3 via GET /profile ao abrir
   useEffect(() => {
-    if (isOpen && (customApiUrl || import.meta.env?.VITE_API_GATEWAY_URL)) {
-      loadProfileImage();
+    if (isOpen) {
+      loadProfileData();
     }
-  }, [isOpen, customApiUrl]);
+  }, [isOpen]);
 
-  const loadProfileImage = async () => {
+  const loadProfileData = async () => {
     if (!token && !currentUser?.isDemo) return;
-    setFetchingImage(true);
+    setFetchingData(true);
     setStatusMessage({ type: '', text: '' });
 
     try {
       const data = await getProfileImage({ token, customUrl: customApiUrl });
+      if (data?.user) {
+        setFormData((prev) => ({
+          ...prev,
+          nome: data.user.nome || prev.nome,
+          email: data.user.email || prev.email,
+          campus: data.user.campus || prev.campus,
+          matricula: data.user.matricula || prev.matricula,
+          curso: data.user.curso || prev.curso,
+          role: data.user.role || prev.role,
+          bio: data.user.bio || prev.bio,
+        }));
+        setDynamoItem(data.user);
+      }
       if (data?.imageUrl) {
         setCurrentImageUrl(data.imageUrl);
-      } else {
-        setCurrentImageUrl(null);
       }
     } catch (err) {
-      console.warn('Erro ao buscar imagem de perfil:', err);
-      // Se não encontrou ou deu erro de configuração, não trava o modal
+      console.warn('Aviso ao carregar perfil:', err);
     } finally {
-      setFetchingImage(false);
+      setFetchingData(false);
     }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
@@ -66,18 +109,15 @@ export default function ProfileModal({ isOpen, onClose }) {
     setStatusMessage({ type: '', text: '' });
   };
 
-  const handleUpload = async (e) => {
+  // Operação PUT /profile: Atualiza no DynamoDB e no S3
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    if (!selectedFile) {
-      setStatusMessage({ type: 'error', text: 'Selecione uma imagem para enviar.' });
-      return;
-    }
-
     setLoading(true);
     setStatusMessage({ type: '', text: '' });
 
     try {
-      const res = await uploadProfileImage({
+      const res = await updateProfile({
+        userData: formData,
         file: selectedFile,
         token,
         customUrl: customApiUrl,
@@ -85,24 +125,33 @@ export default function ProfileModal({ isOpen, onClose }) {
 
       setStatusMessage({
         type: 'success',
-        text: res.message || 'Imagem enviada com sucesso para o bucket S3!',
+        text: res.message || 'Dados e foto de perfil atualizados com sucesso no DynamoDB e S3!',
       });
 
-      if (res.imageUrl) {
-        setCurrentImageUrl(res.imageUrl);
-      } else {
-        // Recarrega via GET /profile
-        await loadProfileImage();
+      if (res.user) {
+        setDynamoItem(res.user);
+        if (res.user.profileImageUrl) {
+          setCurrentImageUrl(res.user.profileImageUrl);
+        }
+        // Atualiza o estado do usuário logado no app
+        if (setCurrentUser) {
+          setCurrentUser((prev) => ({
+            ...prev,
+            nome: res.user.nome,
+            campus: res.user.campus,
+            matricula: res.user.matricula,
+          }));
+        }
       }
 
       setSelectedFile(null);
       setPreviewUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
-      console.error('Falha no upload:', err);
+      console.error('Falha ao atualizar perfil com PUT:', err);
       setStatusMessage({
         type: 'error',
-        text: err.message || 'Erro ao enviar a imagem para o API Gateway.',
+        text: err.message || 'Erro ao atualizar dados cadastrais no DynamoDB / S3.',
       });
     } finally {
       setLoading(false);
@@ -113,98 +162,248 @@ export default function ProfileModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-200">
+      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden border border-slate-200">
         
         {/* Header */}
-        <div className="bg-ufersa-blue-900 text-white px-6 py-5 flex items-center justify-between border-b border-ufersa-blue-800">
+        <div className="bg-ufersa-blue-900 text-white px-6 py-4 flex items-center justify-between border-b border-ufersa-blue-800">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-ufersa-blue-800 rounded-xl">
-              <ImageIcon className="w-5 h-5 text-ufersa-green-400" />
+              <User className="w-5 h-5 text-ufersa-green-400" />
             </div>
             <div>
-              <h3 className="font-bold text-base">Foto de Perfil (/profile)</h3>
-              <p className="text-xs text-ufersa-blue-200">Amazon S3 • API Gateway • Cognito JWT</p>
+              <h3 className="font-bold text-base">Perfil do Usuário (/profile)</h3>
+              <p className="text-xs text-ufersa-blue-200">Operação PUT • S3 + DynamoDB • Cognito JWT</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-ufersa-blue-200 hover:text-white hover:bg-ufersa-blue-800 transition"
+            className="p-1.5 rounded-lg text-ufersa-blue-200 hover:text-white hover:bg-ufersa-blue-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+        {/* Body com Scroll */}
+        <div className="p-6 space-y-5 max-h-[82vh] overflow-y-auto">
           
-          {/* Informações do Usuário e Status do Token JWT */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-800">{currentUser?.nome || 'Usuário Conectado'}</p>
-              <p className="text-[11px] text-slate-500">{currentUser?.email || 'email@ufersa.edu.br'}</p>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>JWT Cognito</span>
-            </div>
-          </div>
-
-          {/* Área da Imagem Atual (Carregada via GET /profile) */}
-          <div className="flex flex-col items-center justify-center p-4 bg-slate-100 rounded-2xl border border-slate-200/80">
-            <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md bg-slate-200 flex items-center justify-center">
-              {previewUrl ? (
-                <img src={previewUrl} alt="Pré-visualização" className="w-full h-full object-cover" />
-              ) : currentImageUrl ? (
-                <img src={currentImageUrl} alt="Foto de Perfil" className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center text-slate-400">
-                  <ImageIcon className="w-10 h-10 mb-1" />
-                  <span className="text-[10px]">Sem foto</span>
-                </div>
-              )}
-
-              {fetchingImage && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <RefreshCw className="w-6 h-6 text-white animate-spin" />
-                </div>
-              )}
+          {/* Badges de Identificação da Infraestrutura AWS */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 flex items-center gap-2">
+              <HardDrive className="w-4 h-4 text-amber-700 shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-amber-800 tracking-wider block">S3 Bucket</span>
+                <span className="text-xs font-mono font-semibold text-slate-800 truncate block">thyago-profile-2026.2</span>
+              </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={loadProfileImage}
-                disabled={fetchingImage}
-                className="text-xs text-ufersa-blue-700 hover:text-ufersa-blue-900 font-medium flex items-center gap-1 cursor-pointer"
-              >
-                <RefreshCw className={`w-3 h-3 ${fetchingImage ? 'animate-spin' : ''}`} />
-                <span>Atualizar via GET /profile</span>
-              </button>
+            <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-2.5 flex items-center gap-2">
+              <Database className="w-4 h-4 text-indigo-700 shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-indigo-800 tracking-wider block">DynamoDB</span>
+                <span className="text-xs font-mono font-semibold text-slate-800 truncate block">Thyago-message-2026.2</span>
+              </div>
+            </div>
+
+            <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2.5 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-emerald-800 tracking-wider block">Segurança</span>
+                <span className="text-xs font-semibold text-slate-800 truncate block">Cognito JWT</span>
+              </div>
             </div>
           </div>
 
-          {/* Formulário de Envio (POST via fetch) */}
-          <form onSubmit={handleUpload} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Selecionar Nova Imagem (POST /profile)
-              </label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-ufersa-blue-50 file:text-ufersa-blue-700 hover:file:bg-ufersa-blue-100 cursor-pointer border border-slate-300 rounded-xl p-1.5"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Formatos aceitos: JPG, PNG, WEBP (máx. 5MB). Enviado via fetch() com método POST.
-              </p>
+          <form onSubmit={handleSaveProfile} className="space-y-5">
+            
+            {/* Foto de Perfil (S3) */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center gap-5">
+              <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-slate-200 flex items-center justify-center shrink-0">
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Nova foto selecionada" className="w-full h-full object-cover" />
+                ) : currentImageUrl ? (
+                  <img src={currentImageUrl} alt="Foto salva no S3" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center text-slate-400">
+                    <ImageIcon className="w-8 h-8 mb-1" />
+                    <span className="text-[10px]">Sem foto</span>
+                  </div>
+                )}
+
+                {fetchingData && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <RefreshCw className="w-5 h-5 text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2 text-center sm:text-left">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Foto de Perfil no S3</h4>
+                  <p className="text-xs text-slate-500">
+                    Foto customizada gravada no bucket <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">thyago-profile-2026.2</code> (diferente da foto federada do Google).
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="profile-file-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3.5 py-1.5 bg-ufersa-blue-700 hover:bg-ufersa-blue-800 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 cursor-pointer transition shadow-xs"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Escolher Nova Foto</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={loadProfileData}
+                    disabled={fetchingData}
+                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium rounded-xl flex items-center gap-1 cursor-pointer transition"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${fetchingData ? 'animate-spin' : ''}`} />
+                    <span>Recarregar S3/Dynamo</span>
+                  </button>
+                </div>
+
+                {selectedFile && (
+                  <p className="text-[11px] text-emerald-600 font-medium">
+                    ✓ Arquivo selecionado: <strong>{selectedFile.name}</strong> (será enviado via PUT)
+                  </p>
+                )}
+              </div>
             </div>
 
-            {/* Mensagens de Feedback */}
+            {/* Dados Cadastrais (DynamoDB) */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+                <Database className="w-4 h-4 text-ufersa-blue-700" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Dados Cadastrais (Tabela DynamoDB: Thyago-message-2026.2)
+                </h4>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                {/* Nome */}
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-slate-400" /> Nome Completo:
+                  </label>
+                  <input
+                    type="text"
+                    name="nome"
+                    value={formData.nome}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-ufersa-blue-500 font-medium text-slate-800"
+                    placeholder="Seu nome completo"
+                    required
+                  />
+                </div>
+
+                {/* E-mail */}
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">E-mail Institucional:</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-600 rounded-xl focus:outline-none font-medium"
+                    placeholder="email@ufersa.edu.br"
+                  />
+                </div>
+
+                {/* Campus */}
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400" /> Campus Universitário:
+                  </label>
+                  <select
+                    name="campus"
+                    value={formData.campus}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-ufersa-blue-500 font-medium text-slate-800 bg-white"
+                  >
+                    <option value="mossoro">Campus Leste / Oeste (Mossoró)</option>
+                    <option value="angicos">Campus Angicos</option>
+                    <option value="caraubas">Campus Caraúbas</option>
+                    <option value="pau_dos_ferros">Campus Pau dos Ferros</option>
+                  </select>
+                </div>
+
+                {/* Matrícula */}
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <IdCard className="w-3.5 h-3.5 text-slate-400" /> Matrícula Acadêmica:
+                  </label>
+                  <input
+                    type="text"
+                    name="matricula"
+                    value={formData.matricula}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-ufersa-blue-500 font-medium text-slate-800"
+                    placeholder="Ex: 2026.2-RU"
+                  />
+                </div>
+
+                {/* Curso */}
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <BookOpen className="w-3.5 h-3.5 text-slate-400" /> Curso / Graduação:
+                  </label>
+                  <input
+                    type="text"
+                    name="curso"
+                    value={formData.curso}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-ufersa-blue-500 font-medium text-slate-800"
+                    placeholder="Ex: Engenharia de Software"
+                  />
+                </div>
+
+                {/* Função / Papel */}
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <School className="w-3.5 h-3.5 text-slate-400" /> Papel no Sistema:
+                  </label>
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-ufersa-blue-500 font-medium text-slate-800 bg-white"
+                  >
+                    <option value="morador">Morador (Discente Residente)</option>
+                    <option value="gestor_coae">Gestor Local (COAE)</option>
+                    <option value="gestor_proae">Gestor Central (PROAE)</option>
+                  </select>
+                </div>
+
+                {/* Biografia / Descrição */}
+                <div className="sm:col-span-2">
+                  <label className="block font-bold text-slate-700 mb-1">Biografia / Apresentação:</label>
+                  <textarea
+                    name="bio"
+                    rows={2}
+                    value={formData.bio}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-ufersa-blue-500 font-medium text-slate-800 resize-none"
+                    placeholder="Informações adicionais do morador..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Mensagem de Feedback */}
             {statusMessage.text && (
               <div
-                className={`p-3 rounded-xl text-xs flex items-start gap-2 ${
+                className={`p-3.5 rounded-xl text-xs flex items-start gap-2.5 ${
                   statusMessage.type === 'success'
                     ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                     : 'bg-rose-50 text-rose-800 border border-rose-200'
@@ -215,72 +414,89 @@ export default function ProfileModal({ isOpen, onClose }) {
                 ) : (
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
                 )}
-                <span className="break-all">{statusMessage.text}</span>
+                <div>
+                  <p className="font-semibold">{statusMessage.text}</p>
+                  {dynamoItem?.updatedAt && (
+                    <p className="text-[11px] text-emerald-700 mt-0.5">
+                      Item persistido no DynamoDB em: {new Date(dynamoItem.updatedAt).toLocaleString('pt-BR')}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Configuração de Endpoint API Gateway */}
-            <div className="pt-2 border-t border-slate-100">
+            {/* Exibição dos Dados do DynamoDB em JSON (Para conferência / print do professor) */}
+            {dynamoItem && (
+              <div className="p-3 bg-slate-900 text-slate-200 rounded-xl text-[11px] font-mono space-y-1">
+                <div className="flex items-center justify-between text-slate-400 border-b border-slate-800 pb-1">
+                  <span>Itens cadastrados na tabela: Thyago-message-2026.2</span>
+                  <span className="text-emerald-400">Status: Sincronizado</span>
+                </div>
+                <div className="overflow-x-auto max-h-32 text-[10px] text-emerald-300 pt-1">
+                  <pre>{JSON.stringify(dynamoItem, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Configuração do Endpoint */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => setShowConfig(!showConfig)}
                 className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer"
               >
                 <Key className="w-3.5 h-3.5" />
-                <span>{showConfig ? 'Ocultar URL da API' : 'Configurar URL do API Gateway'}</span>
+                <span>{showConfig ? 'Ocultar Detalhes API' : 'Ver URL API Gateway / Token JWT'}</span>
               </button>
 
-              {showConfig && (
-                <div className="mt-2 space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                      URL Base do API Gateway:
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="https://abcdef123.execute-api.us-east-1.amazonaws.com/prod"
-                      value={customApiUrl}
-                      onChange={(e) => setCustomApiUrl(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-mono bg-white focus:outline-none focus:ring-1 focus:ring-ufersa-blue-500"
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      Você pode definir <code className="bg-slate-200 px-1 rounded">VITE_API_GATEWAY_URL</code> no arquivo <code className="bg-slate-200 px-1 rounded">.env</code>.
-                    </p>
-                  </div>
-
-                  <div className="pt-1">
-                    <span className="text-[11px] text-slate-500">Token JWT Atual:</span>
-                    <p className="font-mono text-[10px] text-slate-600 truncate bg-slate-200/70 p-1.5 rounded mt-0.5">
-                      {token ? `${token.substring(0, 30)}...${token.slice(-15)}` : 'Nenhum token JWT disponível (faça login com Cognito)'}
-                    </p>
-                  </div>
-                </div>
-              )}
+              <span className="text-[11px] text-slate-400">Método HTTP: <strong>PUT /profile</strong></span>
             </div>
 
+            {showConfig && (
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    Endpoint API Gateway (REST):
+                  </label>
+                  <input
+                    type="text"
+                    value={customApiUrl}
+                    onChange={(e) => setCustomApiUrl(e.target.value)}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-mono bg-white"
+                  />
+                </div>
+                <div>
+                  <span className="text-[11px] text-slate-500">Token JWT Cognito:</span>
+                  <p className="font-mono text-[10px] text-slate-600 truncate bg-slate-200 p-1 rounded mt-0.5">
+                    {token ? `${token.substring(0, 35)}...${token.slice(-20)}` : 'Nenhum token JWT disponível'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Ações */}
-            <div className="flex items-center justify-end gap-2 pt-3">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
               <button
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
               >
-                Fechar
+                Cancelar
               </button>
               <button
                 type="submit"
-                disabled={loading || !selectedFile}
-                className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-slate-950 bg-ufersa-green-400 hover:bg-ufersa-green-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-xs transition cursor-pointer"
+                disabled={loading}
+                className="flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-slate-950 bg-ufersa-green-400 hover:bg-ufersa-green-300 disabled:opacity-50 rounded-xl shadow-xs transition cursor-pointer"
               >
                 {loading ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Enviando...</span>
+                    <span>Salvando via PUT...</span>
                   </>
                 ) : (
                   <>
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Enviar Foto (POST)</span>
+                    <span>Salvar Alterações (PUT /profile)</span>
                   </>
                 )}
               </button>
